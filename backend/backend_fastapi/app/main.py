@@ -17,9 +17,22 @@ app = FastAPI(title="Radio Valle API", description="API para Radio Valle - Notic
 os.makedirs("uploads/images", exist_ok=True)
 
 # Habilitar CORS para permitir conexiones desde el frontend
+# Configuración de CORS: leer orígenes permitidos desde variable de entorno
+# Usa una lista separada por comas en CORS_ALLOW_ORIGINS, por ejemplo:
+# CORS_ALLOW_ORIGINS="https://tu-app.vercel.app,https://otro-dominio.com"
+cors_env = os.getenv("CORS_ALLOW_ORIGINS")
+if cors_env:
+    allow_origins = [o.strip() for o in cors_env.split(",") if o.strip()]
+else:
+    # Valores por defecto para desarrollo local
+    allow_origins = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
