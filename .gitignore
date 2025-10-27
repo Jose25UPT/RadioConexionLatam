@@ -1,0 +1,20 @@
+# Global ignores for this repo
+
+# Node modules (any workspace)
+node_modules/
+**/node_modules/
+
+# Env files (no secrets in repo)
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Build outputs
+/dist/
+**/dist/
+
+# OS/editor noise
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
