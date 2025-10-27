@@ -1,0 +1,54 @@
+services:
+  db:
+    image: postgres:16
+    container_name: radio_postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-radio_pass}
+      POSTGRES_USER: ${DB_USER:-radio_user}
+      POSTGRES_DB: ${DB_NAME:-radio}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./bd/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-radio_user} -d ${DB_NAME:-radio}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - radio_net
+
+  backend:
+    build:
+      context: ./backend/backend_fastapi
+      dockerfile: Dockerfile
+    container_name: radio_backend
+    restart: always
+    env_file: .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-radio_user}
+      DB_PASSWORD: ${DB_PASSWORD:-radio_pass}
+      DB_NAME: ${DB_NAME:-radio}
+      SECRET_KEY: ${SECRET_KEY:-supersecretkey}
+      AUTO_CREATE_DEFAULT_ADMIN: "0"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/backend_fastapi/app/uploads:/app/uploads
+    networks:
+      - radio_net
+
+volumes:
+  db_data:
+
+networks:
+  radio_net:
+    driver: bridge

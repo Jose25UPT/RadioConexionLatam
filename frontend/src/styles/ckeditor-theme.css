@@ -1,0 +1,301 @@
+/* Estilos personalizados para CKEditor 5 - Tema Radio Valle */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+
+/* Contenedor principal del editor */
+.ck-editor__main {
+  font-family: 'Cormorant Garamond', serif;
+}
+
+/* Área editable del contenido */
+.ck-editor__editable {
+  font-family: 'Cormorant Garamond', serif !important;
+  font-size: 16px !important;
+  line-height: 1.7 !important;
+  color: #111827 !important; /* casi negro */
+  background: #ffffff !important; /* blanco clásico */
+  border-color: #d6d3d1 !important;
+}
+
+.ck-editor__editable:focus {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2) !important;
+}
+
+/* Barra de herramientas personalizada */
+.ck-toolbar {
+  background: linear-gradient(135deg, #fef7ed 0%, #fff7ed 100%) !important;
+  border: 1px solid #fed7aa !important;
+  border-radius: 8px 8px 0 0 !important;
+  padding: 8px !important;
+}
+
+/* Botones de la barra de herramientas */
+.ck-button {
+  border-radius: 6px !important;
+  margin: 2px !important;
+  transition: all 0.2s ease !important;
+}
+
+.ck-button:not(.ck-disabled):hover {
+  background: #f59e0b !important;
+  color: white !important;
+  border-color: #d97706 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ck-button.ck-on {
+  background: #d97706 !important;
+  color: white !important;
+  border-color: #b45309 !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Separadores de la barra */
+.ck-toolbar__separator {
+  background: #d6d3d1 !important;
+  margin: 0 8px !important;
+}
+
+/* Dropdowns */
+.ck-dropdown__button:hover {
+  background: #f59e0b !important;
+  color: white !important;
+}
+
+.ck-dropdown__panel {
+  border: 1px solid #fed7aa !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Lista de opciones en dropdowns */
+.ck-list__item .ck-button:hover {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+/* Headings personalizados */
+.ck-content h1 {
+  font-family: 'Cinzel', serif !important;
+  color: #92400e !important;
+  font-weight: 700 !important;
+  font-size: 2.5em !important;
+  line-height: 1.2 !important;
+  margin: 1.5em 0 0.8em 0 !important;
+}
+
+.ck-content h2 {
+  font-family: 'Cinzel', serif !important;
+  color: #a16207 !important;
+  font-weight: 600 !important;
+  font-size: 2em !important;
+  line-height: 1.3 !important;
+  margin: 1.2em 0 0.6em 0 !important;
+}
+
+.ck-content h3 {
+  font-family: 'Cinzel', serif !important;
+  color: #ca8a04 !important;
+  font-weight: 500 !important;
+  font-size: 1.5em !important;
+  margin: 1em 0 0.5em 0 !important;
+}
+
+.ck-content h4 {
+  font-family: 'Cinzel', serif !important;
+  color: #d97706 !important;
+  font-weight: 500 !important;
+  font-size: 1.2em !important;
+  margin: 0.8em 0 0.4em 0 !important;
+}
+
+/* Párrafos */
+.ck-content p {
+  font-family: 'Cormorant Garamond', serif !important;
+  font-size: 16px !important;
+  line-height: 1.7 !important;
+  margin: 0.8em 0 !important;
+  text-align: justify !important;
+  color: #111827 !important; /* asegurar texto oscuro */
+}
+
+/* Links */
+.ck-content a {
+  color: #f59e0b !important;
+  text-decoration: none !important;
+  border-bottom: 1px solid #fed7aa !important;
+  transition: all 0.2s ease !important;
+}
+
+.ck-content a:hover {
+  color: #d97706 !important;
+  border-bottom-color: #f59e0b !important;
+}
+
+/* Blockquotes - estilo anime/manga */
+.ck-content blockquote {
+  border-left: 4px solid #f59e0b !important;
+  background: linear-gradient(135deg, #fef7ed, #fff7ed) !important;
+  margin: 1.5em 0 !important;
+  padding: 1em 1.5em !important;
+  border-radius: 0 8px 8px 0 !important;
+  font-style: italic !important;
+  position: relative !important;
+}
+
+.ck-content blockquote::before {
+  content: '"' !important;
+  font-size: 3em !important;
+  color: #fed7aa !important;
+  position: absolute !important;
+  left: 0.2em !important;
+  top: -0.1em !important;
+  font-family: 'Cinzel', serif !important;
+}
+
+/* Listas */
+.ck-content ul, .ck-content ol {
+  margin: 1em 0 !important;
+  padding-left: 2em !important;
+}
+
+.ck-content li {
+  margin: 0.5em 0 !important;
+  line-height: 1.6 !important;
+}
+
+/* Tablas */
+.ck-content table {
+  border-collapse: collapse !important;
+  border: 2px solid #fed7aa !important;
+  margin: 1.5em 0 !important;
+  width: 100% !important;
+}
+
+.ck-content table th {
+  background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+  color: white !important;
+  font-weight: bold !important;
+  padding: 12px !important;
+  text-align: left !important;
+  font-family: 'Cinzel', serif !important;
+}
+
+.ck-content table td {
+  border: 1px solid #fed7aa !important;
+  padding: 10px !important;
+  font-family: 'Cormorant Garamond', serif !important;
+}
+
+.ck-content table tr:nth-child(even) {
+  background: #fef7ed !important;
+}
+
+/* Imágenes */
+.ck-content img {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  margin: 1em 0 !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Código inline */
+.ck-content code {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  padding: 0.2em 0.4em !important;
+  border-radius: 4px !important;
+  font-size: 0.9em !important;
+  font-family: 'Fira Code', 'Courier New', monospace !important;
+}
+
+/* Líneas horizontales */
+.ck-content hr {
+  border: none !important;
+  height: 3px !important;
+  background: linear-gradient(90deg, transparent, #f59e0b, transparent) !important;
+  margin: 2em 0 !important;
+}
+
+/* Widget de imagen seleccionada */
+.ck-widget.ck-widget_selected {
+  border: 2px solid #f59e0b !important;
+  border-radius: 8px !important;
+}
+
+/* Tooltips */
+.ck-tooltip {
+  background: #1f2937 !important;
+  color: white !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+}
+
+/* Placeholder */
+.ck-editor__editable .ck-placeholder::before {
+  color: #a8a29e !important;
+  font-style: italic !important;
+  font-family: 'Cormorant Garamond', serif !important;
+}
+
+/* Animaciones suaves para transiciones */
+.ck-button, .ck-dropdown__button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Efectos hover adicionales */
+.ck-button:not(.ck-disabled):hover {
+  transform: translateY(-1px) scale(1.02) !important;
+}
+
+/* Forzar modo claro siempre */
+@media (prefers-color-scheme: dark) {
+  .ck-editor__editable {
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+  .ck-toolbar {
+    background: linear-gradient(135deg, #fef7ed 0%, #fff7ed 100%) !important;
+    border-color: #fed7aa !important;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .ck-toolbar {
+    flex-wrap: wrap !important;
+  }
+  
+  .ck-content h1 {
+    font-size: 2em !important;
+  }
+  
+  .ck-content h2 {
+    font-size: 1.7em !important;
+  }
+}
+
+/* Efectos especiales para el tema anime */
+.ck-content::selection {
+  background: rgba(245, 158, 11, 0.3) !important;
+}
+
+.ck-content::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+.ck-content::-webkit-scrollbar-track {
+  background: #f3f4f6 !important;
+  border-radius: 4px !important;
+}
+
+.ck-content::-webkit-scrollbar-thumb {
+  background: #d97706 !important;
+  border-radius: 4px !important;
+}
+
+.ck-content::-webkit-scrollbar-thumb:hover {
+  background: #b45309 !important;
+}
