@@ -5,10 +5,13 @@ export default function SocialMedia() {
   // Sólo mostraremos 3 previsualizaciones: Facebook, Instagram y Spotify
   const facebookPage = 'https://www.facebook.com/radioconexionlatam';
   const instagramPage = (import.meta as any).env?.VITE_INSTAGRAM_PAGE || 'https://www.instagram.com/radioconexion_latam';
+  // Modo de visualización: 'embeds' (por defecto) o 'profile' (solo tarjeta con botón)
+  const instagramMode = (import.meta as any).env?.VITE_INSTAGRAM_MODE || 'embeds';
   const spotifyUrl = (import.meta as any).env?.VITE_SPOTIFY_URL || 'https://open.spotify.com';
   const spotifyEmbed = (import.meta as any).env?.VITE_SPOTIFY_EMBED || '';
   const instagramEmbedsRaw = (import.meta as any).env?.VITE_INSTAGRAM_EMBEDS || '';
   const instagramEmbeds = instagramEmbedsRaw ? instagramEmbedsRaw.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
+  const showEmbeds = instagramMode !== 'profile' && instagramEmbeds.length > 0;
 
   const followers = {
     facebook: '45.2K',
@@ -70,7 +73,7 @@ export default function SocialMedia() {
               <a href={instagramPage} target="_blank" rel="noopener noreferrer" className="bg-gradient-to-br from-pink-500 to-purple-600 text-white px-3 py-1 rounded-lg text-sm">Abrir</a>
             </div>
             <div className="p-3">
-              {instagramEmbeds.length > 0 ? (
+              {showEmbeds ? (
                 <div className="space-y-3">
                   {instagramEmbeds.slice(0, 3).map((url: string, idx: number) => (
                     <div key={idx} className="w-full h-44 bg-gray-50 overflow-hidden rounded-md">
@@ -88,8 +91,8 @@ export default function SocialMedia() {
                 </div>
               ) : (
                 <div className="h-44 flex flex-col items-center justify-center text-sm text-stone-700 bg-gray-50 rounded-md">
-                  <p className="font-semibold mb-2">Vista previa no disponible</p>
-                  <p className="text-xs mb-3">Por restricciones de Instagram no siempre se puede embeber. Puedes configurar `VITE_INSTAGRAM_EMBEDS` con URLs de embed en tu .env</p>
+                  <p className="font-semibold mb-2">Instagram</p>
+                  <p className="text-xs mb-3">Vista previa del perfil disponible. Pulsa el botón para abrir el perfil oficial.</p>
                   <a href={instagramPage} target="_blank" rel="noopener noreferrer" className="inline-block bg-gradient-to-br from-pink-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm">Abrir Instagram</a>
                 </div>
               )}
