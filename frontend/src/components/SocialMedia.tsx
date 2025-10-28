@@ -1,4 +1,4 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { Facebook, Instagram, Music } from 'lucide-react';
 import DeviceFrame from './DeviceFrame';
 
@@ -99,17 +99,7 @@ export default function SocialMedia() {
         {showEmbeds ? (
           <div className="h-full overflow-auto">
             {instagramEmbeds.slice(0, 4).map((url: string, idx: number) => (
-              <div key={idx} className="w-full h-64 bg-gray-50 overflow-hidden">
-                <iframe
-                  title={`Instagram ${idx}`}
-                  src={url}
-                  style={{ border: 'none', overflow: 'hidden' }}
-                  scrolling="no"
-                  frameBorder={0}
-                  allow="encrypted-media; autoplay; clipboard-write"
-                  className="w-full h-full"
-                />
-              </div>
+              <InstaEmbed key={idx} url={url} idx={idx} />
             ))}
           </div>
         ) : (
@@ -139,15 +129,7 @@ export default function SocialMedia() {
       </div>
       <div className="mx-3 mb-4 rounded-2xl overflow-hidden ring-1 ring-black/10 h-[560px] bg-white">
         {spotifyEmbed ? (
-          <iframe
-            title="Spotify Preview"
-            src={spotifyEmbed}
-            width="100%"
-            height="100%"
-            frameBorder={0}
-            allow="encrypted-media; autoplay; clipboard-write"
-            className="w-full h-full"
-          />
+          <SpotifyEmbed embedUrl={spotifyEmbed} openUrl={spotifyUrl} />
         ) : (
           <div className="h-full flex items-center justify-center text-sm text-stone-700">
             <div>
@@ -320,5 +302,103 @@ export default function SocialMedia() {
         </div>
       </div>
     </section>
+  );
+}
+
+// --- Subcomponentes de ayuda ---
+
+function InstaEmbed({ url, idx }: { url: string; idx: number }) {
+  const [key, setKey] = useState(0);
+  const [loaded, setLoaded] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
+
+  useEffect(() => {
+    setLoaded(false);
+    setTimedOut(false);
+    const t = setTimeout(() => {
+      if (!loaded) setTimedOut(true);
+    }, 7000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, url]);
+
+  const openPost = url.replace('/embed', '/');
+
+  return (
+    <div className="relative w-full h-64 bg-gray-50 overflow-hidden">
+      {!loaded && (
+        <div className="absolute inset-0 flex items-center justify-center text-xs text-stone-600">
+          Cargando publicación…
+        </div>
+      )}
+      {timedOut && !loaded && (
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center gap-2 p-3 text-center">
+          <p className="text-sm font-medium">No se pudo cargar la vista previa</p>
+          <div className="flex gap-2">
+            <button onClick={() => setKey(k => k + 1)} className="px-3 py-1.5 rounded-md bg-stone-900 text-white text-xs">Reintentar</button>
+            <a href={openPost} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-md bg-gradient-to-br from-pink-500 to-purple-600 text-white text-xs">Abrir publicación</a>
+          </div>
+        </div>
+      )}
+      <iframe
+        key={key}
+        title={`Instagram ${idx}`}
+        src={url}
+        style={{ border: 'none', overflow: 'hidden' }}
+        scrolling="no"
+        frameBorder={0}
+        loading="lazy"
+        allow="encrypted-media; autoplay; clipboard-write"
+        className="w-full h-full"
+        onLoad={() => setLoaded(true)}
+      />
+    </div>
+  );
+}
+
+function SpotifyEmbed({ embedUrl, openUrl }: { embedUrl: string; openUrl: string }) {
+  const [key, setKey] = useState(0);
+  const [loaded, setLoaded] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
+
+  useEffect(() => {
+    setLoaded(false);
+    setTimedOut(false);
+    const t = setTimeout(() => {
+      if (!loaded) setTimedOut(true);
+    }, 7000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, embedUrl]);
+
+  return (
+    <div className="relative w-full h-full">
+      {!loaded && (
+        <div className="absolute inset-0 flex items-center justify-center text-xs text-stone-600">
+          Cargando Spotify…
+        </div>
+      )}
+      {timedOut && !loaded && (
+        <div className="absolute inset-0 bg-white/85 backdrop-blur-sm flex flex-col items-center justify-center gap-2 p-3 text-center">
+          <p className="text-sm font-medium">No se pudo cargar la vista previa</p>
+          <div className="flex gap-2">
+            <button onClick={() => setKey(k => k + 1)} className="px-3 py-1.5 rounded-md bg-stone-900 text-white text-xs">Reintentar</button>
+            <a href={openUrl} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-md bg-green-600 text-white text-xs">Abrir Spotify</a>
+          </div>
+        </div>
+      )}
+      <iframe
+        key={key}
+        title="Spotify Preview"
+        src={embedUrl}
+        width="100%"
+        height="100%"
+        frameBorder={0}
+        loading="lazy"
+        allow="encrypted-media; autoplay; clipboard-write"
+        className="w-full h-full"
+        onLoad={() => setLoaded(true)}
+      />
+    </div>
   );
 }
