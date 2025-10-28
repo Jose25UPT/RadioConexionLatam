@@ -4,7 +4,7 @@ import { Facebook, Instagram, Music } from 'lucide-react';
 export default function SocialMedia() {
   // Sólo mostraremos 3 previsualizaciones: Facebook, Instagram y Spotify
   const facebookPage = 'https://www.facebook.com/radioconexionlatam';
-  const instagramPage = 'https://www.instagram.com/radioconexionlatam';
+  const instagramPage = (import.meta as any).env?.VITE_INSTAGRAM_PAGE || 'https://www.instagram.com/radioconexion_latam';
   const spotifyUrl = (import.meta as any).env?.VITE_SPOTIFY_URL || 'https://open.spotify.com';
   const spotifyEmbed = (import.meta as any).env?.VITE_SPOTIFY_EMBED || '';
   const instagramEmbedsRaw = (import.meta as any).env?.VITE_INSTAGRAM_EMBEDS || '';
