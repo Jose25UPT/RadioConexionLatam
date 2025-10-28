@@ -3,14 +3,22 @@ import { Facebook, Instagram, Music } from 'lucide-react';
 
 export default function SocialMedia() {
   // Sólo mostraremos 3 previsualizaciones: Facebook, Instagram y Spotify
-  const cardStyle = (import.meta as any).env?.VITE_SOCIAL_CARD_STYLE || 'solid'; // 'solid' | 'glass'
-  const cardBase = cardStyle === 'glass'
-    ? 'relative group rounded-2xl overflow-hidden border border-white/20 bg-white/60 backdrop-blur-xl shadow-xl hover:shadow-2xl transition duration-300 hover:-translate-y-[2px]'
-    : 'bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition duration-200';
-  const headerBase = cardStyle === 'glass'
-    ? 'p-4 flex items-center justify-between border-b border-white/30 bg-gradient-to-r from-white/70 to-white/30'
-    : 'p-4 flex items-center justify-between border-b border-gray-100';
-  const facebookPage = 'https://www.facebook.com/radioconexionlatam';
+  const cardStyle = (import.meta as any).env?.VITE_SOCIAL_CARD_STYLE || 'solid'; // 'solid' | 'glass' | 'neon'
+  const cardBase =
+    cardStyle === 'glass'
+      ? 'relative group rounded-2xl overflow-hidden border border-white/20 bg-white/60 backdrop-blur-xl shadow-xl hover:shadow-2xl transition duration-300 hover:-translate-y-[2px]'
+      : cardStyle === 'neon'
+      ? 'relative group rounded-2xl overflow-hidden border border-amber-300/30 bg-stone-900 text-white shadow-[0_0_30px_rgba(255,200,0,0.15)] hover:shadow-[0_0_45px_rgba(255,200,0,0.3)] transition duration-300 hover:-translate-y-[2px]'
+      : 'bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition duration-200';
+  const headerBase =
+    cardStyle === 'glass'
+      ? 'p-4 flex items-center justify-between border-b border-white/30 bg-gradient-to-r from-white/70 to-white/30'
+      : cardStyle === 'neon'
+      ? 'p-4 flex items-center justify-between border-b border-amber-300/30 bg-gradient-to-r from-amber-500/10 to-pink-500/10'
+      : 'p-4 flex items-center justify-between border-b border-gray-100';
+  const facebookPage = (import.meta as any).env?.VITE_FACEBOOK_PAGE || 'https://www.facebook.com/radioconexionlatam';
+  const facebookMode = (import.meta as any).env?.VITE_FACEBOOK_MODE || 'page'; // 'page' | 'video'
+  const facebookVideoUrl = (import.meta as any).env?.VITE_FACEBOOK_VIDEO_URL || '';
   const instagramPage = (import.meta as any).env?.VITE_INSTAGRAM_PAGE || 'https://www.instagram.com/radioconexion_latam';
   // Modo de visualización: 'embeds' (por defecto) o 'profile' (solo tarjeta con botón)
   const instagramMode = (import.meta as any).env?.VITE_INSTAGRAM_MODE || 'embeds';
@@ -52,16 +60,29 @@ export default function SocialMedia() {
               <a href={facebookPage} target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm shadow hover:brightness-110">Abrir</a>
             </div>
             <div className="w-full h-72 bg-gradient-to-b from-white/60 to-gray-50">
-              <iframe
-                title="Facebook Page"
-                src={`https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(facebookPage)}&tabs=timeline&width=360&height=300&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId=`}
-                style={{ border: 'none', overflow: 'hidden' }}
-                scrolling="no"
-                frameBorder={0}
-                allowFullScreen={true}
-                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                className="w-full h-full"
-              />
+              {facebookMode === 'video' && facebookVideoUrl ? (
+                <iframe
+                  title="Facebook Video"
+                  src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(facebookVideoUrl)}&autoplay=1&mute=1&show_text=false&width=360&height=300`}
+                  style={{ border: 'none', overflow: 'hidden' }}
+                  scrolling="no"
+                  frameBorder={0}
+                  allowFullScreen={true}
+                  allow="autoplay; encrypted-media; clipboard-write; picture-in-picture; web-share"
+                  className="w-full h-full"
+                />
+              ) : (
+                <iframe
+                  title="Facebook Page"
+                  src={`https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(facebookPage)}&tabs=timeline&width=360&height=300&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId=`}
+                  style={{ border: 'none', overflow: 'hidden' }}
+                  scrolling="no"
+                  frameBorder={0}
+                  allowFullScreen={true}
+                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                  className="w-full h-full"
+                />
+              )}
             </div>
           </div>
 
