@@ -3,7 +3,7 @@ import { Facebook, Instagram, Music } from 'lucide-react';
 
 export default function SocialMedia() {
   // Sólo mostraremos 3 previsualizaciones: Facebook, Instagram y Spotify
-  const cardStyle = (import.meta as any).env?.VITE_SOCIAL_CARD_STYLE || 'solid'; // 'solid' | 'glass' | 'neon' | 'aurora'
+  const cardStyle = (import.meta as any).env?.VITE_SOCIAL_CARD_STYLE || 'aurora'; // 'solid' | 'glass' | 'neon' | 'aurora'
     const cardBase =
       cardStyle === 'glass'
       ? 'relative group rounded-2xl overflow-hidden border border-white/20 bg-white/60 backdrop-blur-xl shadow-xl hover:shadow-2xl transition duration-300 hover:-translate-y-[2px]'
