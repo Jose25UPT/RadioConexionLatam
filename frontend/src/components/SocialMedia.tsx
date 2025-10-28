@@ -3,6 +3,13 @@ import { Facebook, Instagram, Music } from 'lucide-react';
 
 export default function SocialMedia() {
   // Sólo mostraremos 3 previsualizaciones: Facebook, Instagram y Spotify
+  const cardStyle = (import.meta as any).env?.VITE_SOCIAL_CARD_STYLE || 'solid'; // 'solid' | 'glass'
+  const cardBase = cardStyle === 'glass'
+    ? 'relative group rounded-2xl overflow-hidden border border-white/20 bg-white/60 backdrop-blur-xl shadow-xl hover:shadow-2xl transition duration-300 hover:-translate-y-[2px]'
+    : 'bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition duration-200';
+  const headerBase = cardStyle === 'glass'
+    ? 'p-4 flex items-center justify-between border-b border-white/30 bg-gradient-to-r from-white/70 to-white/30'
+    : 'p-4 flex items-center justify-between border-b border-gray-100';
   const facebookPage = 'https://www.facebook.com/radioconexionlatam';
   const instagramPage = (import.meta as any).env?.VITE_INSTAGRAM_PAGE || 'https://www.instagram.com/radioconexion_latam';
   // Modo de visualización: 'embeds' (por defecto) o 'profile' (solo tarjeta con botón)
@@ -31,10 +38,10 @@ export default function SocialMedia() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Facebook preview */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
-            <div className="p-4 flex items-center justify-between border-b border-gray-100">
+          <div className={cardBase}>
+            <div className={headerBase}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-600 rounded-md flex items-center justify-center text-white">
+                <div className="w-10 h-10 bg-blue-600 rounded-md flex items-center justify-center text-white shadow-sm">
                   <Facebook className="w-5 h-5" />
                 </div>
                 <div>
@@ -42,9 +49,9 @@ export default function SocialMedia() {
                   <div className="text-xs text-stone-500">{followers.facebook} seguidores</div>
                 </div>
               </div>
-              <a href={facebookPage} target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm">Abrir</a>
+              <a href={facebookPage} target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm shadow hover:brightness-110">Abrir</a>
             </div>
-            <div className="w-full h-72 bg-gray-50">
+            <div className="w-full h-72 bg-gradient-to-b from-white/60 to-gray-50">
               <iframe
                 title="Facebook Page"
                 src={`https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(facebookPage)}&tabs=timeline&width=360&height=300&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId=`}
@@ -59,10 +66,10 @@ export default function SocialMedia() {
           </div>
 
           {/* Instagram preview */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
-            <div className="p-4 flex items-center justify-between border-b border-gray-100">
+          <div className={cardBase}>
+            <div className={headerBase}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-md flex items-center justify-center text-white">
+                <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-md flex items-center justify-center text-white shadow-sm">
                   <Instagram className="w-5 h-5" />
                 </div>
                 <div>
@@ -70,7 +77,7 @@ export default function SocialMedia() {
                   <div className="text-xs text-stone-500">{followers.instagram} seguidores</div>
                 </div>
               </div>
-              <a href={instagramPage} target="_blank" rel="noopener noreferrer" className="bg-gradient-to-br from-pink-500 to-purple-600 text-white px-3 py-1 rounded-lg text-sm">Abrir</a>
+              <a href={instagramPage} target="_blank" rel="noopener noreferrer" className="bg-gradient-to-br from-pink-500 to-purple-600 text-white px-3 py-1 rounded-lg text-sm shadow hover:brightness-110">Abrir</a>
             </div>
             <div className="p-3">
               {showEmbeds ? (
@@ -100,10 +107,10 @@ export default function SocialMedia() {
           </div>
 
           {/* Spotify preview */}
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
-            <div className="p-4 flex items-center justify-between border-b border-gray-100">
+          <div className={cardBase}>
+            <div className={headerBase}>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-600 rounded-md flex items-center justify-center text-white">
+                <div className="w-10 h-10 bg-green-600 rounded-md flex items-center justify-center text-white shadow-sm">
                   <Music className="w-5 h-5" />
                 </div>
                 <div>
@@ -111,9 +118,9 @@ export default function SocialMedia() {
                   <div className="text-xs text-stone-500">Podcast / Episodios</div>
                 </div>
               </div>
-              <a href={spotifyUrl} target="_blank" rel="noopener noreferrer" className="bg-green-600 text-white px-3 py-1 rounded-lg text-sm">Abrir</a>
+              <a href={spotifyUrl} target="_blank" rel="noopener noreferrer" className="bg-green-600 text-white px-3 py-1 rounded-lg text-sm shadow hover:brightness-110">Abrir</a>
             </div>
-            <div className="w-full h-72 bg-gray-50">
+            <div className="w-full h-72 bg-gradient-to-b from-white/60 to-gray-50">
               {spotifyEmbed ? (
                 <iframe
                   title="Spotify Preview"
