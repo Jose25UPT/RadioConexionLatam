@@ -73,14 +73,17 @@ export default function SocialMedia() {
               {instagramEmbeds.length > 0 ? (
                 <div className="space-y-3">
                   {instagramEmbeds.slice(0, 3).map((url: string, idx: number) => (
-                    <div key={idx} className="w-full h-44 bg-gray-50 overflow-hidden rounded-md">
+                    <div key={url} className="w-full h-[540px] bg-gray-50 overflow-hidden rounded-md">
                       <iframe
                         title={`Instagram ${idx}`}
                         src={url}
+                        loading="lazy"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        sandbox="allow-scripts allow-same-origin allow-popups"
                         style={{ border: 'none', overflow: 'hidden' }}
                         scrolling="no"
                         frameBorder={0}
-                        allow="encrypted-media; autoplay; clipboard-write"
+                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
                         className="w-full h-full"
                       />
                     </div>
