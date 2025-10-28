@@ -1,9 +1,10 @@
 import React from 'react';
 import { Facebook, Instagram, Music } from 'lucide-react';
+import DeviceFrame from './DeviceFrame';
 
 export default function SocialMedia() {
   // Sólo mostraremos 3 previsualizaciones: Facebook, Instagram y Spotify
-  const cardStyle = (import.meta as any).env?.VITE_SOCIAL_CARD_STYLE || 'aurora'; // 'solid' | 'glass' | 'neon' | 'aurora'
+  const cardStyle = (import.meta as any).env?.VITE_SOCIAL_CARD_STYLE || 'iphone'; // 'solid' | 'glass' | 'neon' | 'aurora' | 'iphone'
     const cardBase =
       cardStyle === 'glass'
       ? 'relative group rounded-2xl overflow-hidden border border-white/20 bg-white/60 backdrop-blur-xl shadow-xl hover:shadow-2xl transition duration-300 hover:-translate-y-[2px]'
@@ -11,7 +12,7 @@ export default function SocialMedia() {
       ? 'relative group rounded-2xl overflow-hidden border border-amber-300/30 bg-stone-900 text-white shadow-[0_0_30px_rgba(255,200,0,0.15)] hover:shadow-[0_0_45px_rgba(255,200,0,0.3)] transition duration-300 hover:-translate-y-[2px]'
         : cardStyle === 'aurora'
         ? 'relative group rounded-3xl overflow-hidden border border-white/20 bg-white/10 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.15)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.25)] transition-all duration-500 hover:-translate-y-1'
-      : 'bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition duration-200';
+  : 'bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition duration-200';
   const headerBase =
       cardStyle === 'glass'
       ? 'p-4 flex items-center justify-between border-b border-white/30 bg-gradient-to-r from-white/70 to-white/30'
@@ -38,6 +39,128 @@ export default function SocialMedia() {
     spotify: '—'
   };
 
+  const renderFacebook = () => (
+    <>
+      <div className="p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-sm">
+            <Facebook className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="font-semibold">Facebook</div>
+            <div className="text-xs text-stone-500">{followers.facebook} seguidores</div>
+          </div>
+        </div>
+        <a href={facebookPage} target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm shadow hover:brightness-110">Abrir</a>
+      </div>
+      <div className="mx-3 mb-4 rounded-2xl overflow-hidden ring-1 ring-black/10 h-[560px] bg-white">
+        {facebookMode === 'video' && facebookVideoUrl ? (
+          <iframe
+            title="Facebook Video"
+            src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(facebookVideoUrl)}&autoplay=1&mute=1&show_text=false&width=360&height=560`}
+            style={{ border: 'none', overflow: 'hidden' }}
+            scrolling="no"
+            frameBorder={0}
+            allowFullScreen={true}
+            allow="autoplay; encrypted-media; clipboard-write; picture-in-picture; web-share"
+            className="w-full h-full"
+          />
+        ) : (
+          <iframe
+            title="Facebook Page"
+            src={`https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(facebookPage)}&tabs=timeline&width=360&height=560&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId=`}
+            style={{ border: 'none', overflow: 'hidden' }}
+            scrolling="no"
+            frameBorder={0}
+            allowFullScreen={true}
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            className="w-full h-full"
+          />
+        )}
+      </div>
+    </>
+  );
+
+  const renderInstagram = () => (
+    <>
+      <div className="p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-sm">
+            <Instagram className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="font-semibold">Instagram</div>
+            <div className="text-xs text-stone-500">{followers.instagram} seguidores</div>
+          </div>
+        </div>
+        <a href={instagramPage} target="_blank" rel="noopener noreferrer" className="bg-gradient-to-br from-pink-500 to-purple-600 text-white px-3 py-1.5 rounded-lg text-sm shadow hover:brightness-110">Abrir</a>
+      </div>
+      <div className="mx-3 mb-4 rounded-2xl overflow-hidden ring-1 ring-black/10 h-[560px] bg-gray-50">
+        {showEmbeds ? (
+          <div className="h-full overflow-auto">
+            {instagramEmbeds.slice(0, 4).map((url: string, idx: number) => (
+              <div key={idx} className="w-full h-64 bg-gray-50 overflow-hidden">
+                <iframe
+                  title={`Instagram ${idx}`}
+                  src={url}
+                  style={{ border: 'none', overflow: 'hidden' }}
+                  scrolling="no"
+                  frameBorder={0}
+                  allow="encrypted-media; autoplay; clipboard-write"
+                  className="w-full h-full"
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center text-sm text-stone-700">
+            <p className="font-semibold mb-2">Instagram</p>
+            <p className="text-xs mb-3 px-6 text-center">Vista previa del perfil disponible. Pulsa el botón para abrir el perfil oficial.</p>
+            <a href={instagramPage} target="_blank" rel="noopener noreferrer" className="inline-block bg-gradient-to-br from-pink-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm">Abrir Instagram</a>
+          </div>
+        )}
+      </div>
+    </>
+  );
+
+  const renderSpotify = () => (
+    <>
+      <div className="p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center text-white shadow-sm">
+            <Music className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="font-semibold">Spotify</div>
+            <div className="text-xs text-stone-500">Podcast / Episodios</div>
+          </div>
+        </div>
+        <a href={spotifyUrl} target="_blank" rel="noopener noreferrer" className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm shadow hover:brightness-110">Abrir</a>
+      </div>
+      <div className="mx-3 mb-4 rounded-2xl overflow-hidden ring-1 ring-black/10 h-[560px] bg-white">
+        {spotifyEmbed ? (
+          <iframe
+            title="Spotify Preview"
+            src={spotifyEmbed}
+            width="100%"
+            height="100%"
+            frameBorder={0}
+            allow="encrypted-media; autoplay; clipboard-write"
+            className="w-full h-full"
+          />
+        ) : (
+          <div className="h-full flex items-center justify-center text-sm text-stone-700">
+            <div>
+              <p className="font-semibold mb-2">Vista previa no disponible</p>
+              <p className="text-xs mb-3 text-center px-6">Configura VITE_SPOTIFY_EMBED en tu .env para ver una previsualización embebida.</p>
+              <a href={spotifyUrl} target="_blank" rel="noopener noreferrer" className="inline-block bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Abrir Spotify</a>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+
   return (
     <section id="redes" className="py-16 bg-gradient-to-br from-purple-50 to-pink-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -50,6 +173,9 @@ export default function SocialMedia() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Facebook preview */}
+          {cardStyle === 'iphone' ? (
+            <DeviceFrame gradient="blue">{renderFacebook()}</DeviceFrame>
+          ) : (
           <div className={cardBase}>
             {cardStyle === 'aurora' && (
               <div className="pointer-events-none absolute -inset-1 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
@@ -94,8 +220,12 @@ export default function SocialMedia() {
               )}
             </div>
           </div>
+          )}
 
           {/* Instagram preview */}
+          {cardStyle === 'iphone' ? (
+            <DeviceFrame gradient="purple">{renderInstagram()}</DeviceFrame>
+          ) : (
           <div className={cardBase}>
             {cardStyle === 'aurora' && (
               <div className="pointer-events-none absolute -inset-1 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
@@ -140,8 +270,12 @@ export default function SocialMedia() {
               )}
             </div>
           </div>
+          )}
 
           {/* Spotify preview */}
+          {cardStyle === 'iphone' ? (
+            <DeviceFrame gradient="green">{renderSpotify()}</DeviceFrame>
+          ) : (
           <div className={cardBase}>
             {cardStyle === 'aurora' && (
               <div className="pointer-events-none absolute -inset-1 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
@@ -182,6 +316,7 @@ export default function SocialMedia() {
               )}
             </div>
           </div>
+          )}
         </div>
       </div>
     </section>
