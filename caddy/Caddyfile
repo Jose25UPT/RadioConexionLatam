@@ -1,0 +1,27 @@
+# Reverse proxy para la API con TLS automático
+# Requisitos:
+# - Crear un registro DNS A para api.radioconexionlatam.net.pe apuntando a 161.132.47.193
+# - Abrir puertos 80 y 443 en firewall del VPS
+# - Docker compose levantará Caddy con este archivo
+
+api.radioconexionlatam.net.pe {
+  encode zstd gzip
+
+  # Cabeceras útiles
+  header {
+    # Si usas rewrites en Vercel, CORS no es necesario, pero dejamos permitido por seguridad controlada.
+    Access-Control-Allow-Origin https://radioconexionlatam.net.pe
+    Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers "Authorization, Content-Type"
+    Access-Control-Allow-Credentials true
+  }
+
+  # Proxy a la app FastAPI del servicio 'backend'
+  reverse_proxy backend:8000
+
+  # Health endpoint opcional
+  @health path /health
+  handle @health {
+    respond "ok" 200
+  }
+}

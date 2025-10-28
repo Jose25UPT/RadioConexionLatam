@@ -11,7 +11,7 @@ export default function Hero({ onPlayLive }: HeroProps) {
       {/* Background Image */}
       <div className="absolute inset-0">
         <img 
-          src="./public/portada1.png"
+          src="/portada1.png"
           alt="Radio Studio Background"
           className="w-full h-full object-cover"
         />

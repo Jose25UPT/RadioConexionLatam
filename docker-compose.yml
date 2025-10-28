@@ -36,6 +36,7 @@ services:
       DB_NAME: ${DB_NAME:-radio}
       SECRET_KEY: ${SECRET_KEY:-supersecretkey}
       AUTO_CREATE_DEFAULT_ADMIN: "0"
+      CORS_ALLOW_ORIGINS: https://radioconexionlatam.net.pe
     depends_on:
       db:
         condition: service_healthy
@@ -46,8 +47,26 @@ services:
     networks:
       - radio_net
 
+  caddy:
+    image: caddy:2.7
+    container_name: radio_caddy
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - radio_net
+
 volumes:
   db_data:
+  caddy_data:
+  caddy_config:
 
 networks:
   radio_net:
