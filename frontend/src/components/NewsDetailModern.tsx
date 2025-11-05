@@ -2,9 +2,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { 
-  ArrowLeft, Clock, User, Eye, Heart, MessageCircle, Share2, Bookmark, 
-  Facebook, Twitter, Calendar, Tag, TrendingUp,
-  ChevronRight, Home, Copy, Check, MessageSquare,
+  ArrowLeft, Clock, User, Eye, MessageCircle, Share2, Heart,
+  Calendar, Tag, TrendingUp,
+  ChevronRight, Home, Check, MessageSquare,
   UserCircle, Mail, Globe, Star
 } from 'lucide-react';
 
@@ -33,11 +33,7 @@ interface AutorPerfil {
 export default function NewsDetailModern() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
-  const [showShareMenu, setShowShareMenu] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [currentLikes, setCurrentLikes] = useState(0);
   const [noticia, setNoticia] = useState<NoticiaTipo | null>(null);
   const [relacionadas, setRelacionadas] = useState<NoticiaTipo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,7 +58,7 @@ export default function NewsDetailModern() {
   // Cargar detalle y relacionadas desde API
   useEffect(() => {
     // Asegurar que el usuario ve el inicio del artículo al entrar
-    try { window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); } catch {}
+    try { window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); } catch (/* ignore */ _err) { /* no-op */ }
     let mounted = true;
     (async () => {
       try {
@@ -77,8 +73,9 @@ export default function NewsDetailModern() {
           const rel = await fetchJson<NoticiaTipo[]>(`/api/noticias/?categoria=${encodeURIComponent(cat)}&limite=6`);
           if (mounted) setRelacionadas(rel.filter(n => n.slug !== detalle.slug).slice(0,3));
         }
-      } catch (e: any) {
-        setError(e?.message || 'Error cargando noticia');
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : 'Error cargando noticia';
+        setError(msg);
       } finally {
         setLoading(false);
       }
@@ -107,40 +104,29 @@ export default function NewsDetailModern() {
   // Noticias relacionadas (excluyendo la actual)
   const noticiasRelacionadas = relacionadas;
 
-  useEffect(() => {
-    if (noticia) {
-      setCurrentLikes(noticia.likes || 0);
-    }
-  }, [noticia]);
-
   const handleBack = () => {
     navigate(-1);
   };
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setCurrentLikes(prev => isLiked ? prev - 1 : prev + 1);
-  };
-
-  const handleShare = (platform: string) => {
+  const handleShare = async () => {
     const currentUrl = window.location.href;
-    const title = noticia?.titulo || '';
-    
-    const urls = {
-      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`,
-      twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(title)}`,
-      instagram: `https://www.instagram.com/`,
-      copy: currentUrl
-    };
-
-    if (platform === 'copy') {
-      navigator.clipboard.writeText(currentUrl);
+    const title = noticia?.titulo || 'Compartir noticia';
+    const text = noticia?.resumen || 'Mira esta noticia';
+    try {
+      if (navigator.share) {
+        await navigator.share({ title, text, url: currentUrl });
+        return;
+      }
+      await navigator.clipboard.writeText(currentUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } else {
-      window.open(urls[platform as keyof typeof urls], '_blank');
+    } catch (_e) {
+      try {
+        await navigator.clipboard.writeText(currentUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (/* ignore */ _err) { /* noop */ }
     }
-    setShowShareMenu(false);
   };
 
   const redesOrden = [
@@ -374,71 +360,23 @@ export default function NewsDetailModern() {
         </div>
       </section>
 
-      {/* Barra de acciones flotante */}
-      <div className="fixed left-4 top-1/2 transform -translate-y-1/2 z-50 hidden lg:block">
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-stone-200 p-2 space-y-2">
-          <button
-            onClick={handleLike}
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${
-              isLiked ? 'bg-red-100 text-red-600' : 'hover:bg-stone-100 text-stone-600'
-            }`}
-          >
-            <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-            <span className="text-[10px] font-semibold">{currentLikes}</span>
-          </button>
-
-          <button
-            onClick={() => setIsBookmarked(!isBookmarked)}
-            className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${
-              isBookmarked ? 'bg-amber-100 text-amber-600' : 'hover:bg-stone-100 text-stone-600'
-            }`}
-          >
-            <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
-            <span className="text-[10px] font-semibold">Guardar</span>
-          </button>
-
-          <div className="relative">
-            <button
-              onClick={() => setShowShareMenu(!showShareMenu)}
-              className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-stone-100 text-stone-600 transition-all duration-300"
-            >
-              <Share2 className="w-5 h-5" />
-              <span className="text-[10px] font-semibold">{noticia.compartidos}</span>
-            </button>
-
-            {/* Share menu */}
-            {showShareMenu && (
-              <div className="absolute left-full ml-3 top-0 bg-white rounded-xl shadow-xl border border-stone-200 p-2 space-y-2 min-w-[180px]">
-                <button
-                  onClick={() => handleShare('facebook')}
-                  className="w-full flex items-center gap-2 p-2 hover:bg-blue-50 rounded-lg text-blue-600 transition-colors text-sm"
-                >
-                  <Facebook className="w-5 h-5" />
-                  <span className="font-medium">Facebook</span>
-                </button>
-                <button
-                  onClick={() => handleShare('twitter')}
-                  className="w-full flex items-center gap-2 p-2 hover:bg-sky-50 rounded-lg text-sky-600 transition-colors text-sm"
-                >
-                  <Twitter className="w-5 h-5" />
-                  <span className="font-medium">Twitter</span>
-                </button>
-                <button
-                  onClick={() => handleShare('copy')}
-                  className="w-full flex items-center gap-2 p-2 hover:bg-stone-50 rounded-lg text-stone-600 transition-colors text-sm"
-                >
-                  {copied ? <Check className="w-5 h-5 text-green-600" /> : <Copy className="w-5 h-5" />}
-                  <span className="font-medium">{copied ? 'Copiado!' : 'Copiar enlace'}</span>
-                </button>
-              </div>
-            )}
+      {/* Botón único de compartir flotante */}
+      <div className="fixed right-4 bottom-6 md:right-8 md:bottom-8 z-50">
+        <button
+          onClick={handleShare}
+          title="Compartir"
+          className="relative flex items-center justify-center rounded-full p-4 md:p-5 shadow-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:from-amber-600 hover:to-orange-700 transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-400"
+          style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+        >
+          <Share2 className="w-6 h-6" />
+        </button>
+        {copied && (
+          <div className="mt-2 text-xs bg-black/80 text-white px-3 py-1 rounded-full shadow-lg text-center">
+            <span className="inline-flex items-center gap-1">
+              <Check className="w-3 h-3 text-green-400" /> Enlace copiado
+            </span>
           </div>
-
-          <button className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-stone-100 text-stone-600 transition-all duration-300">
-            <MessageCircle className="w-5 h-5" />
-            <span className="text-[10px] font-semibold">{noticia.comentarios}</span>
-          </button>
-        </div>
+        )}
       </div>
 
       {/* Contenido del artículo */}
@@ -473,44 +411,7 @@ export default function NewsDetailModern() {
             <cite className="block mt-4 text-amber-700 font-semibold">— Del artículo</cite>
           </div>
 
-          {/* Acciones del artículo en mobile */}
-          <div className="lg:hidden bg-stone-50 rounded-2xl p-4 mt-10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <button
-                  onClick={handleLike}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300 text-sm ${
-                    isLiked ? 'bg-red-100 text-red-600' : 'bg-white text-stone-600 hover:bg-red-50'
-                  }`}
-                >
-                  <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
-                  <span className="font-semibold">{currentLikes}</span>
-                </button>
-
-                <button className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white text-stone-600 hover:bg-blue-50 transition-colors text-sm">
-                  <MessageCircle className="w-4 h-4" />
-                  <span className="font-semibold">{noticia.comentarios}</span>
-                </button>
-
-                <button
-                  onClick={() => setShowShareMenu(!showShareMenu)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white text-stone-600 hover:bg-green-50 transition-colors text-sm"
-                >
-                  <Share2 className="w-4 h-4" />
-                  <span className="font-semibold">{noticia.compartidos}</span>
-                </button>
-              </div>
-
-              <button
-                onClick={() => setIsBookmarked(!isBookmarked)}
-                className={`p-2.5 rounded-xl transition-all duration-300 ${
-                  isBookmarked ? 'bg-amber-500 text-white' : 'bg-white text-stone-600 hover:bg-amber-50'
-                }`}
-              >
-                <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
-              </button>
-            </div>
-          </div>
+          {/* Acciones móviles eliminadas: solo usamos el botón flotante de compartir */}
         </div>
       </section>
 
