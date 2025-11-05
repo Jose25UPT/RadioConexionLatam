@@ -8,6 +8,7 @@ import {
 
 import type { Noticia as NoticiaTipo } from '../types/Noticia';
 import { fetchJson, API_BASE } from '../lib/api';
+import { truncateWords } from '../lib/text';
 
 const CATEGORIA_TODAS = 'Todas';
 
@@ -365,7 +366,7 @@ export default function AllNewsModern() {
                       <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(noticia.fecha).toLocaleDateString('es-ES')}</span>
                       <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{noticia.vistas.toLocaleString()}</span>
                     </div>
-                    <p className="text-stone-600 text-sm leading-relaxed font-['Cormorant_Garamond'] line-clamp-3 mb-4">{noticia.resumen || noticia.contenido}</p>
+                    <p className="text-stone-600 text-sm leading-relaxed font-['Cormorant_Garamond'] line-clamp-3 mb-4">{truncateWords(noticia.resumen || noticia.contenido, 50)}</p>
                     <div className="flex items-center justify-between pt-4 border-t border-stone-100">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow">
@@ -442,7 +443,7 @@ export default function AllNewsModern() {
                       </h2>
 
                       <p className="text-stone-600 leading-relaxed font-['Cormorant_Garamond'] mb-6 line-clamp-3">
-                        {noticia.contenido}
+                        {truncateWords(noticia.resumen || noticia.contenido, 50)}
                       </p>
 
                       {/* Tags */}

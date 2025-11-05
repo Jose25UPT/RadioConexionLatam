@@ -11,6 +11,7 @@ import {
 import type { Noticia as NoticiaTipo } from '../types/Noticia';
 import DOMPurify from 'dompurify';
 import { fetchJson, API_BASE } from '../lib/api';
+import { truncateWords } from '../lib/text';
 
 interface AutorPerfil {
   nombre: string;
@@ -294,9 +295,9 @@ export default function NewsDetailModern() {
               {noticia.titulo}
             </h1>
 
-            {/* Resumen */}
+            {/* Resumen (limitado a 50 palabras) */}
             <p className="text-xl md:text-2xl text-white/90 mb-8 font-['Cormorant_Garamond'] leading-relaxed max-w-4xl">
-              {noticia.resumen}
+              {truncateWords(noticia.resumen, 50)}
             </p>
 
             {/* Meta información */}
@@ -595,7 +596,7 @@ export default function NewsDetailModern() {
 
                 <div className="p-6">
                   <p className="text-stone-600 text-sm leading-relaxed font-['Cormorant_Garamond'] line-clamp-3 mb-4">
-                    {relacionada.resumen}
+                    {truncateWords(relacionada.resumen, 50)}
                   </p>
 
                   <div className="flex items-center justify-between text-xs text-stone-500 mb-4">

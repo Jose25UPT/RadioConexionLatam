@@ -2,6 +2,7 @@ import { Calendar, User, Eye, ExternalLink, MessageCircle, Share2, Heart, Clock 
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchJson, API_BASE } from '../lib/api';
+import { truncateWords } from '../lib/text';
 import type { Noticia as NoticiaTipo } from '../types/Noticia';
 
 export default function News() {
@@ -119,7 +120,7 @@ export default function News() {
                       <div className="flex items-center gap-2 text-white/90 text-sm"><Eye className="w-4 h-4" /><span>{featuredNews[0].vistas.toLocaleString()}</span></div>
                     </div>
                     <h3 className="text-3xl lg:text-4xl font-bold text-white mb-4 leading-tight group-hover:text-amber-200 transition-colors duration-300">{featuredNews[0].titulo}</h3>
-                    <p className="text-white/90 text-lg leading-relaxed line-clamp-3 mb-4">{featuredNews[0].resumen}</p>
+                    <p className="text-white/90 text-lg leading-relaxed line-clamp-3 mb-4">{truncateWords(featuredNews[0].resumen, 50)}</p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center"><User className="w-5 h-5 text-white" /></div>
@@ -159,7 +160,7 @@ export default function News() {
                         <span className="flex items-center gap-2"><Eye className="w-4 h-4" />{featuredNews[1].vistas.toLocaleString()}</span>
                       </div>
                       <h3 className="text-2xl lg:text-3xl font-bold text-white mb-3 leading-tight group-hover:text-amber-200 transition-colors duración-300">{featuredNews[1].titulo}</h3>
-                      <p className="text-white/90 text-base leading-relaxed line-clamp-2 mb-3">{featuredNews[1].resumen}</p>
+                      <p className="text-white/90 text-base leading-relaxed line-clamp-2 mb-3">{truncateWords(featuredNews[1].resumen, 50)}</p>
                       <div className="flex items-center gap-2">
                         <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center"><User className="w-5 h-5 text-white" /></div>
                         <span className="text-white text-sm">{featuredNews[1].autor_info?.nombre || 'Autor'}</span>
@@ -190,7 +191,7 @@ export default function News() {
                       <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{n.vistas.toLocaleString()}</span>
                     </div>
                     <h4 className="font-bold text-md text-stone-800 mb-2 line-clamp-2 group-hover:text-amber-700 transition-colors duration-300">{n.titulo}</h4>
-                    <p className="text-stone-600 text-sm leading-relaxed line-clamp-3 mb-3 flex-1">{n.resumen}</p>
+                    <p className="text-stone-600 text-sm leading-relaxed line-clamp-3 mb-3 flex-1">{truncateWords(n.resumen, 50)}</p>
                     <div className="flex items-center justify-between pt-2">
                       <div className="flex items-center gap-2"><div className="w-6 h-6 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center"><User className="w-3 h-3 text-white" /></div><span className="text-xs text-stone-600 font-medium">{n.autor_info?.nombre || 'Autor'}</span></div>
                       <div className="flex items-center gap-3 text-stone-400 text-xs"><span className="flex items-center gap-1"><Heart className="w-3 h-3" />{n.likes}</span><span className="flex items-center gap-1"><MessageCircle className="w-3 h-3" />{n.comentarios}</span></div>
