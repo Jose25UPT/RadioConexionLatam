@@ -151,7 +151,7 @@ export default function Programs() {
         </div>
 
         {/* Nota */}
-        <p className="text-xs text-purple-200 mt-6">Horario en hora local. La grilla puede variar por eventos especiales.</p>
+        <p className="text-xs text-purple-200 mt-6">Horario en hora local.</p>
       </div>
     </section>
   );
