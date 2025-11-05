@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { 
   ArrowLeft, Clock, User, Eye, Heart, MessageCircle, Share2, Bookmark, 
   Facebook, Twitter, Calendar, Tag, TrendingUp,
@@ -179,8 +180,65 @@ export default function NewsDetailModern() {
     );
   }
 
+  // Construir datos SEO
+  const siteName = 'Radio Conexión Latam';
+  const url = typeof window !== 'undefined' ? window.location.href : '';
+  const img = noticia.imagen?.startsWith('http') ? noticia.imagen : `${API_BASE}${noticia.imagen}`;
+  const title = noticia.titulo;
+  const description = noticia.resumen || (noticia.contenido ?? '').replace(/<[^>]+>/g, '').slice(0, 160);
+  const publishedTime = new Date(noticia.fecha).toISOString();
+  const modifiedTime = publishedTime;
+  const jsonLd = useMemo(() => ({
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: title,
+    image: [img],
+    datePublished: publishedTime,
+    dateModified: modifiedTime,
+    author: noticia.autor_info?.nombre ? { '@type': 'Person', name: noticia.autor_info.nombre } : undefined,
+    publisher: {
+      '@type': 'Organization',
+      name: siteName,
+      logo: {
+        '@type': 'ImageObject',
+        url: '/logo.jpg'
+      }
+    },
+    description,
+    mainEntityOfPage: url
+  }), [title, img, publishedTime, modifiedTime, url, description, noticia.autor_info?.nombre]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
+      <Helmet>
+        <title>{`${title} | ${siteName}`}</title>
+        <meta name="description" content={description} />
+        <link rel="canonical" href={url} />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={`${title} | ${siteName}`} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={img} />
+        <meta property="og:url" content={url} />
+        <meta property="og:site_name" content={siteName} />
+  <meta property="og:locale" content="es_LA" />
+        <meta property="article:published_time" content={publishedTime} />
+        {noticia.categoria && <meta property="article:section" content={noticia.categoria} />}
+        {noticia.tags?.slice(0, 6).map((t, i) => (
+          <meta key={i} property="article:tag" content={t} />
+        ))}
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${title} | ${siteName}`} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={img} />
+        {/* Si tienes usuario: <meta name="twitter:site" content="@tu_usuario" /> */}
+
+        {/* Json-LD */}
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+      </Helmet>
       {/* Hero Section con imagen de fondo completa */}
   <section className="relative min-h-screen overflow-visible pt-24 md:pt-28 pt-[env(safe-area-inset-top)]">
         {/* Imagen de fondo */}
