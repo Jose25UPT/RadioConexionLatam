@@ -138,6 +138,36 @@ export default function NewsDetailModern() {
     return entries;
   };
 
+  // Datos SEO y JSON-LD: deben declararse antes de cualquier return para respetar las reglas de Hooks
+  const siteName = 'Radio Conexión Latam';
+  const url = typeof window !== 'undefined' ? window.location.href : '';
+  const img = noticia?.imagen
+    ? (noticia.imagen.startsWith('http') ? noticia.imagen : `${API_BASE}${noticia.imagen}`)
+    : '/logo.jpg';
+  const title = noticia?.titulo || '';
+  const description = noticia?.resumen || (noticia?.contenido ?? '').replace(/<[^>]+>/g, '').slice(0, 160) || '';
+  const publishedTime = noticia?.fecha ? new Date(noticia.fecha).toISOString() : new Date().toISOString();
+  const modifiedTime = publishedTime;
+  const jsonLd = useMemo(() => ({
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: title || 'Noticia',
+    image: [img],
+    datePublished: publishedTime,
+    dateModified: modifiedTime,
+    author: noticia?.autor_info?.nombre ? { '@type': 'Person', name: noticia.autor_info.nombre } : undefined,
+    publisher: {
+      '@type': 'Organization',
+      name: siteName,
+      logo: {
+        '@type': 'ImageObject',
+        url: '/logo.jpg'
+      }
+    },
+    description,
+    mainEntityOfPage: url
+  }), [title, img, publishedTime, modifiedTime, url, description, noticia?.autor_info?.nombre]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">
@@ -166,33 +196,7 @@ export default function NewsDetailModern() {
     );
   }
 
-  // Construir datos SEO
-  const siteName = 'Radio Conexión Latam';
-  const url = typeof window !== 'undefined' ? window.location.href : '';
-  const img = noticia.imagen?.startsWith('http') ? noticia.imagen : `${API_BASE}${noticia.imagen}`;
-  const title = noticia.titulo;
-  const description = noticia.resumen || (noticia.contenido ?? '').replace(/<[^>]+>/g, '').slice(0, 160);
-  const publishedTime = new Date(noticia.fecha).toISOString();
-  const modifiedTime = publishedTime;
-  const jsonLd = useMemo(() => ({
-    '@context': 'https://schema.org',
-    '@type': 'NewsArticle',
-    headline: title,
-    image: [img],
-    datePublished: publishedTime,
-    dateModified: modifiedTime,
-    author: noticia.autor_info?.nombre ? { '@type': 'Person', name: noticia.autor_info.nombre } : undefined,
-    publisher: {
-      '@type': 'Organization',
-      name: siteName,
-      logo: {
-        '@type': 'ImageObject',
-        url: '/logo.jpg'
-      }
-    },
-    description,
-    mainEntityOfPage: url
-  }), [title, img, publishedTime, modifiedTime, url, description, noticia.autor_info?.nombre]);
+  // (SEO data moved above to satisfy Hooks rules)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50">
