@@ -6,9 +6,16 @@
     {
       "source": "/noticia/:slug",
       "has": [
-        { "type": "header", "key": "user-agent", "value": "(?i)(facebookexternalhit|Twitterbot|LinkedInBot|Slackbot|WhatsApp|TelegramBot|Discordbot)" }
+        { "type": "header", "key": "user-agent", "value": ".*(bot|facebookexternalhit|facebook|twitterbot|Twitterbot|linkedinbot|LinkedInBot|slack|Slackbot|whatsapp|WhatsApp|telegram|TelegramBot|discord|DiscordBot|embed|crawler|spider|preview).*" }
       ],
       "destination": "/api/share-meta?slug=:slug"
+    },
+    {
+      "source": "/noticia/(.*)",
+      "has": [
+        { "type": "header", "key": "user-agent", "value": ".*(bot|facebookexternalhit|facebook|twitterbot|Twitterbot|linkedinbot|LinkedInBot|slack|Slackbot|whatsapp|WhatsApp|telegram|TelegramBot|discord|DiscordBot|embed|crawler|spider|preview).*" }
+      ],
+      "destination": "/api/share-meta?slug=$1"
     },
     { "source": "/noticias", "destination": "/index.html" },
     { "source": "/noticia/(.*)", "destination": "/index.html" },
