@@ -65,14 +65,33 @@ export default function NewsDetailModern() {
       try {
         setLoading(true);
         if (!slug) throw new Error('Slug inválido');
-        const detalle = await fetchJson<NoticiaTipo>(`/api/noticias/slug/${encodeURIComponent(slug)}`);
+        let detalle: NoticiaTipo | null = null;
+        try {
+          detalle = await fetchJson<NoticiaTipo>(`/api/noticias/slug/${encodeURIComponent(slug)}`);
+        } catch (err) {
+          // Fallback: buscar por título normalizado si el slug de BD no existe
+          try {
+            const lista = await fetchJson<NoticiaTipo[]>(`/api/noticias/?limite=200`);
+            const match = (lista || []).find(n => (n.slug && n.slug === slug) || generateSlug(n.titulo) === slug);
+            if (match) {
+              detalle = match;
+              // Redirigir a slug canónico si existe
+              const canonical = match.slug || generateSlug(match.titulo);
+              if (canonical && canonical !== slug) {
+                navigate(`/noticia/${canonical}` as any, { replace: true });
+              }
+            }
+          } catch {/* ignore */}
+        }
+
         if (!mounted) return;
+        if (!detalle) throw new Error('Artículo no encontrado');
         setNoticia(detalle);
         // cargar relacionadas por categoría si hay
         const cat = detalle?.categoria;
         if (cat) {
           const rel = await fetchJson<NoticiaTipo[]>(`/api/noticias/?categoria=${encodeURIComponent(cat)}&limite=6`);
-          if (mounted) setRelacionadas(rel.filter(n => n.slug !== detalle.slug).slice(0,3));
+          if (mounted) setRelacionadas(rel.filter(n => n.slug !== detalle!.slug).slice(0,3));
         }
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : 'Error cargando noticia';

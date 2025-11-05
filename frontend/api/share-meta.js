@@ -3,7 +3,8 @@ export default async function handler(req, res) {
   const slug = (req.query.slug || '').toString();
   const site = 'https://www.radioconexionlatam.net.pe';
   const api = 'https://api.radioconexionlatam.net.pe';
-  const url = `${site}/noticia/${encodeURIComponent(slug)}`;
+  // La URL final puede ajustarse si encontramos un slug canónico diferente
+  let canonicalSlug = slug;
   const twitterCard = process.env.TWITTER_CARD || 'summary';
 
     // Traer la noticia desde el backend público
@@ -14,6 +15,20 @@ export default async function handler(req, res) {
         noticia = await r.json();
       }
     } catch {}
+    // Fallback: si no existe ese slug en BD, intentar buscar por título normalizado
+    if (!noticia) {
+      try {
+        const r2 = await fetch(`${api}/api/noticias/?limite=200`);
+        if (r2.ok) {
+          const list = await r2.json();
+          const found = Array.isArray(list) ? list.find(n => (n.slug && n.slug === slug) || slugify(n.titulo) === slug) : null;
+          if (found) noticia = found;
+        }
+      } catch {}
+    }
+    if (noticia?.slug) {
+      canonicalSlug = noticia.slug;
+    }
 
     const title = noticia?.titulo ? `${noticia.titulo} | Radio Conexión Latam` : 'Radio Conexión Latam';
     const description = trimText(noticia?.resumen || 'Noticias, música y cultura para Latinoamérica.', 200);
@@ -33,7 +48,7 @@ export default async function handler(req, res) {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${escapeHtml(title)}</title>
   <meta name="description" content="${escapeHtml(description)}" />
-  <link rel="canonical" href="${url}" />
+  <link rel="canonical" href="${site}/noticia/${encodeURIComponent(canonicalSlug)}" />
 
   <meta property="og:type" content="article" />
   <meta property="og:title" content="${escapeHtml(title)}" />
@@ -43,7 +58,7 @@ export default async function handler(req, res) {
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="${escapeHtml(title)}" />
-  <meta property="og:url" content="${url}" />
+  <meta property="og:url" content="${site}/noticia/${encodeURIComponent(canonicalSlug)}" />
   <meta property="og:site_name" content="Radio Conexión Latam" />
   <meta property="og:locale" content="es_LA" />
   <meta property="og:updated_time" content="${new Date().toISOString()}" />
@@ -65,15 +80,15 @@ export default async function handler(req, res) {
     dateModified: published,
     publisher: { '@type': 'Organization', name: 'Radio Conexión Latam', logo: { '@type': 'ImageObject', url: `${site}/logo.jpg` } },
     description,
-    mainEntityOfPage: url,
+  mainEntityOfPage: `${site}/noticia/${encodeURIComponent(canonicalSlug)}`,
   })}</script>
 </head>
 <body>
   <noscript>
-    <meta http-equiv="refresh" content="0; url=${url}" />
-    <p>Si no eres red social, abre la noticia aquí: <a href="${url}">${url}</a></p>
+    <meta http-equiv="refresh" content="0; url=${site}/noticia/${encodeURIComponent(canonicalSlug)}" />
+    <p>Si no eres red social, abre la noticia aquí: <a href="${site}/noticia/${encodeURIComponent(canonicalSlug)}">${site}/noticia/${encodeURIComponent(canonicalSlug)}</a></p>
   </noscript>
-  <script>location.replace(${JSON.stringify(url)});</script>
+  <script>location.replace(${JSON.stringify(`${site}/noticia/${encodeURIComponent(canonicalSlug)}`)});</script>
 </body>
 </html>`;
 
@@ -97,4 +112,19 @@ function trimText(str, max = 200) {
   const s = String(str || '').replace(/\s+/g, ' ').trim();
   if (s.length <= max) return s;
   return s.slice(0, max - 1).trimEnd() + '…';
+}
+
+function slugify(str) {
+  return String(str || '')
+    .toLowerCase()
+    .replace(/[áäàâã]/g, 'a')
+    .replace(/[éëèê]/g, 'e')
+    .replace(/[íïìî]/g, 'i')
+    .replace(/[óöòôõ]/g, 'o')
+    .replace(/[úüùû]/g, 'u')
+    .replace(/ñ/g, 'n')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
