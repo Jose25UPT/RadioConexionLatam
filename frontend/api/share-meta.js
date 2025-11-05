@@ -1,9 +1,10 @@
 export default async function handler(req, res) {
   try {
-    const slug = (req.query.slug || '').toString();
-    const site = 'https://www.radioconexionlatam.net.pe';
-    const api = 'https://api.radioconexionlatam.net.pe';
-    const url = `${site}/noticia/${encodeURIComponent(slug)}`;
+  const slug = (req.query.slug || '').toString();
+  const site = 'https://www.radioconexionlatam.net.pe';
+  const api = 'https://api.radioconexionlatam.net.pe';
+  const url = `${site}/noticia/${encodeURIComponent(slug)}`;
+  const twitterCard = process.env.TWITTER_CARD || 'summary';
 
     // Traer la noticia desde el backend público
     let noticia = null;
@@ -15,10 +16,11 @@ export default async function handler(req, res) {
     } catch {}
 
     const title = noticia?.titulo ? `${noticia.titulo} | Radio Conexión Latam` : 'Radio Conexión Latam';
-    const description = noticia?.resumen || 'Noticias, música y cultura para Latinoamérica.';
+    const description = trimText(noticia?.resumen || 'Noticias, música y cultura para Latinoamérica.', 200);
     const image = (noticia?.imagen || '').startsWith('http')
       ? noticia?.imagen
       : (noticia?.imagen ? `${api}${noticia.imagen}` : `${site}/logo.jpg`);
+    const imageSecure = image?.startsWith('http') ? image.replace(/^http:/, 'https:') : `${site}/logo.jpg`;
     const published = noticia?.fecha ? new Date(noticia.fecha).toISOString() : undefined;
     const section = noticia?.categoria || undefined;
     const tags = Array.isArray(noticia?.tags) ? noticia.tags.slice(0, 6) : [];
@@ -36,21 +38,23 @@ export default async function handler(req, res) {
   <meta property="og:type" content="article" />
   <meta property="og:title" content="${escapeHtml(title)}" />
   <meta property="og:description" content="${escapeHtml(description)}" />
-  <meta property="og:image" content="${image}" />
+  <meta property="og:image" content="${imageSecure}" />
+  <meta property="og:image:secure_url" content="${imageSecure}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="${escapeHtml(title)}" />
   <meta property="og:url" content="${url}" />
   <meta property="og:site_name" content="Radio Conexión Latam" />
   <meta property="og:locale" content="es_LA" />
+  <meta property="og:updated_time" content="${new Date().toISOString()}" />
   ${published ? `<meta property="article:published_time" content="${published}" />` : ''}
   ${section ? `<meta property="article:section" content="${escapeHtml(section)}" />` : ''}
   ${tags.map(t => `<meta property="article:tag" content="${escapeHtml(String(t))}" />`).join('\n  ')}
 
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:card" content="${twitterCard}" />
   <meta name="twitter:title" content="${escapeHtml(title)}" />
   <meta name="twitter:description" content="${escapeHtml(description)}" />
-  <meta name="twitter:image" content="${image}" />
+  <meta name="twitter:image" content="${imageSecure}" />
 
   <script type="application/ld+json">${JSON.stringify({
     '@context': 'https://schema.org',
@@ -87,4 +91,10 @@ function escapeHtml(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function trimText(str, max = 200) {
+  const s = String(str || '').replace(/\s+/g, ' ').trim();
+  if (s.length <= max) return s;
+  return s.slice(0, max - 1).trimEnd() + '…';
 }
