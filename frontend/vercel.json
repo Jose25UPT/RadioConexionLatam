@@ -2,6 +2,13 @@
   "rewrites": [
     { "source": "/api/(.*)", "destination": "https://api.radioconexionlatam.net.pe/api/$1" },
     { "source": "/uploads/(.*)", "destination": "https://api.radioconexionlatam.net.pe/uploads/$1" },
+    {
+      "source": "/noticia/:slug",
+      "has": [
+        { "type": "header", "key": "user-agent", "value": "(?i)(facebookexternalhit|Twitterbot|LinkedInBot|Slackbot|WhatsApp|TelegramBot|Discordbot)" }
+      ],
+      "destination": "/api/share-meta?slug=:slug"
+    },
     { "source": "/((?!api|uploads|.*\\..*).*)", "destination": "/index.html" }
   ],
   "headers": [
