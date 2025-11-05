@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/api/share-meta", "destination": "/api/share-meta" },
     { "source": "/api/(.*)", "destination": "https://api.radioconexionlatam.net.pe/api/$1" },
     { "source": "/uploads/(.*)", "destination": "https://api.radioconexionlatam.net.pe/uploads/$1" },
     {
@@ -9,7 +10,9 @@
       ],
       "destination": "/api/share-meta?slug=:slug"
     },
-    { "source": "/((?!api|uploads|.*\\..*).*)", "destination": "/index.html" }
+    { "source": "/noticias", "destination": "/index.html" },
+    { "source": "/noticia/(.*)", "destination": "/index.html" },
+    { "source": "/secure_panel_rva_gestor_2025/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
