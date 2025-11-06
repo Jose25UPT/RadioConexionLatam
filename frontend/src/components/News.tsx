@@ -68,10 +68,10 @@ export default function News() {
   const openAllNewsPage = () => navigate('/noticias');
 
   return (
-    <section id="noticias" className="py-20 bg-gradient-to-br from-indigo-950 via-slate-900 to-fuchsia-900 relative overflow-hidden scroll-mt-24 md:scroll-mt-28">
-      <div className="absolute inset-0 opacity-[0.15]">
-        <div className="absolute -top-10 left-1/4 w-72 h-72 bg-cyan-600/30 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-10 w-80 h-80 bg-fuchsia-600/30 rounded-full blur-3xl"></div>
+    <section id="noticias" className="py-20 bg-gradient-to-br from-indigo-800 via-purple-800 to-fuchsia-700 relative overflow-hidden scroll-mt-24 md:scroll-mt-28">
+      <div className="absolute inset-0 opacity-[0.18]">
+        <div className="absolute -top-10 left-1/4 w-72 h-72 bg-cyan-400/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-10 w-80 h-80 bg-fuchsia-400/30 rounded-full blur-3xl"></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
