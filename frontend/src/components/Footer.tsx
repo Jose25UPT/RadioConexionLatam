@@ -1,5 +1,6 @@
-import React from 'react';
-import { Facebook, Instagram, Youtube, Headphones } from 'lucide-react';
+import { Headphones } from 'lucide-react';
+import { FaFacebookF, FaInstagram, FaSpotify, FaYoutube } from 'react-icons/fa';
+import { FaXTwitter, FaTiktok } from 'react-icons/fa6';
 
 export default function Footer() {
   return (
@@ -43,27 +44,90 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Contact and Social */}
+          {/* Redes Oficiales (con recuadro e ícono a color) y contactos comentados */}
           <div>
-            <h4 className="text-lg font-bold mb-4 text-pink-300">Síguenos</h4>
-            
-            {/* Social Media */}
-            <div className="flex space-x-3 mb-4">
-              <a href="#" className="bg-white/10 hover:bg-pink-600 p-2 rounded-lg transition-all duration-300">
-                <Facebook className="h-4 w-4" />
-              </a>
-              <a href="#" className="bg-white/10 hover:bg-pink-600 p-2 rounded-lg transition-all duration-300">
-                <Instagram className="h-4 w-4" />
-              </a>
-              <a href="#" className="bg-white/10 hover:bg-pink-600 p-2 rounded-lg transition-all duration-300">
-                <Youtube className="h-4 w-4" />
-              </a>
-            </div>
-
+            <h4 className="text-lg font-bold mb-4 text-pink-300">Redes Oficiales</h4>
+            <ul className="grid grid-cols-3 gap-3 mb-6">
+              <li>
+                <a
+                  href="https://www.youtube.com/channel/UCCVlwnb2MW6nnhGVYr7vHVg"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col items-center gap-1 bg-white/10 hover:bg-red-600/80 rounded-xl px-3 py-3 transition-all"
+                  aria-label="YouTube"
+                >
+                  <FaYoutube className="w-5 h-5 text-red-500 group-hover:text-white transition-colors" />
+                  <span className="text-[10px] font-medium text-white/70 group-hover:text-white">YouTube</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.tiktok.com/@radioconexion_latam"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col items-center gap-1 bg-white/10 hover:bg-black rounded-xl px-3 py-3 transition-all"
+                  aria-label="TikTok"
+                >
+                  <FaTiktok className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+                  <span className="text-[10px] font-medium text-white/70 group-hover:text-white">TikTok</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://open.spotify.com/show/2QIEylnlbAahByrVqbwjhx"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col items-center gap-1 bg-white/10 hover:bg-[#1DB954] rounded-xl px-3 py-3 transition-all"
+                  aria-label="Spotify"
+                >
+                  <FaSpotify className="w-5 h-5 text-[#1DB954] group-hover:text-white transition-colors" />
+                  <span className="text-[10px] font-medium text-white/70 group-hover:text-white">Spotify</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.facebook.com/radioconexionLATAM"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col items-center gap-1 bg-white/10 hover:bg-[#1877F2] rounded-xl px-3 py-3 transition-all"
+                  aria-label="Facebook"
+                >
+                  <FaFacebookF className="w-5 h-5 text-[#1877F2] group-hover:text-white transition-colors" />
+                  <span className="text-[10px] font-medium text-white/70 group-hover:text-white">Facebook</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.instagram.com/radioconexion_latam/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col items-center gap-1 bg-white/10 hover:from-pink-500 hover:to-purple-600 hover:bg-gradient-to-br rounded-xl px-3 py-3 transition-all"
+                  aria-label="Instagram"
+                >
+                  <FaInstagram className="w-5 h-5 text-pink-400 group-hover:text-white transition-colors" />
+                  <span className="text-[10px] font-medium text-white/70 group-hover:text-white">Instagram</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://x.com/RConexion_LATAM"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col items-center gap-1 bg-white/10 hover:bg-black rounded-xl px-3 py-3 transition-all"
+                  aria-label="X"
+                >
+                  <FaXTwitter className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+                  <span className="text-[10px] font-medium text-white/70 group-hover:text-white">X / Twitter</span>
+                </a>
+              </li>
+            </ul>
+            {/* Datos de contacto comentados para futura activación */}
+            {/**
             <div className="text-gray-300 text-sm space-y-1">
-              <p>📧 info@conexionlatam.com</p>
-              <p>📞 +52 (55) 1234-5678</p>
+              <p>📧 {import.meta.env.VITE_CONTACT_EMAIL || 'info@conexionlatam.com'}</p>
+              <p>📞 {import.meta.env.VITE_CONTACT_PHONE || '+52 (55) 1234-5678'}</p>
             </div>
+            */}
           </div>
         </div>
 

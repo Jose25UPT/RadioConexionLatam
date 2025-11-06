@@ -84,56 +84,52 @@ export default function News() {
           <p className="text-white/60 max-w-2xl mx-auto text-sm md:text-base">Estrenos, anuncios de temporadas, estudios y eventos clave de la industria anime.</p>
         </div>
 
-        {/* Botón circular creativo (FAB) con silueta anime */}
-        <div className="z-30">
-          {/* Overlay para cerrar al hacer click fuera */}
-          {showFab && (
-            <button aria-hidden className="fixed inset-0 z-20" onClick={() => setShowFab(false)} />
-          )}
-          {/* Etiqueta sutil junto al FAB */}
-          {!showFab && (
-            <div className="fixed bottom-8 right-24 md:bottom-10 md:right-28 z-30 pointer-events-none select-none">
-              <span className="px-2.5 py-1 rounded-full bg-white/10 text-white/80 text-[11px] border border-white/10 backdrop-blur-sm">abre aquí</span>
-            </div>
-          )}
-          <button
-            type="button"
-            aria-label={showFab ? 'Cerrar panel de anime' : 'Abrir panel de anime'}
-            aria-expanded={showFab}
-            aria-controls="anime-fab-panel"
-            onClick={() => setShowFab(v => !v)}
-            className="fixed bottom-6 right-6 md:bottom-8 md:right-8 w-14 h-14 rounded-full overflow-hidden grid place-items-center bg-gradient-to-br from-blue-600 to-fuchsia-700 text-white shadow-2xl shadow-fuchsia-700/30 border border-white/10 ring-2 ring-white/10 hover:ring-white/20 transition transform hover:scale-105 z-30"
-          >
-            {/* Aura animada */}
-            <span className={`absolute inset-0 rounded-full bg-fuchsia-500/20 blur-md ${showFab ? 'opacity-60' : 'opacity-40'} animate-pulse`} aria-hidden></span>
-            {/* Silueta anime */}
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="relative text-white drop-shadow">
-              <path d="M12 3c-2 0-3.8 1.2-4.5 3C5.2 6.4 4 7.9 4 9.7c0 1.9 1.4 3.5 3.2 3.8C7.9 17 9.7 19 12 19s4.1-2 4.8-5.5c1.8-.3 3.2-2 3.2-3.8 0-1.8-1.2-3.3-3.5-3.7-.7-1.8-2.5-3-4.5-3Z" />
-              <path d="M9 22c1 .6 2 .9 3 .9s2-.3 3-.9" />
-            </svg>
-          </button>
-          {/* Panel emergente */}
-          {showFab && (
-            <div className="fixed bottom-24 right-6 md:right-8 z-30">
-              <div id="anime-fab-panel" role="dialog" aria-modal="false" className="bg-slate-900/90 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-md p-3 w-60">
-                <div className="px-1 pb-2">
-                  <p className="text-[11px] text-white/60">Explora más contenido de anime</p>
+        {/* Botón circular creativo (FAB) con silueta anime dentro del contenedor */}
+        <div className="relative z-20">
+          <div className="flex justify-end">
+            <div className="relative">
+              {!showFab && (
+                <div className="absolute -left-24 md:-left-28 top-1/2 -translate-y-1/2 pointer-events-none select-none">
+                  <span className="px-3 py-1 rounded-full bg-white/10 text-white/80 text-[12px] border border-white/10 backdrop-blur-sm">abre aquí</span>
                 </div>
-                <button
-                  onClick={openAllNewsPage}
-                  className="w-full flex items-center justify-between gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white text-sm font-semibold shadow-lg hover:shadow-fuchsia-500/30 transition group"
-                >
-                  <span className="flex items-center gap-2">
-                    <span className="inline-block w-6 h-6 rounded-full bg-white/10 grid place-items-center">
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </span>
-                    Ver todas las noticias
-                  </span>
-                  <span className="text-white/80 group-hover:translate-x-0.5 transition">→</span>
-                </button>
-              </div>
+              )}
+              <button
+                type="button"
+                aria-label={showFab ? 'Cerrar panel de anime' : 'Abrir panel de anime'}
+                aria-expanded={showFab}
+                aria-controls="anime-fab-panel"
+                onClick={() => setShowFab(v => !v)}
+                className="relative w-16 h-16 md:w-18 md:h-18 rounded-full overflow-hidden grid place-items-center bg-gradient-to-br from-blue-600 to-fuchsia-700 text-white shadow-2xl shadow-fuchsia-700/30 border border-white/10 ring-2 ring-white/10 hover:ring-white/20 transition transform hover:scale-105"
+              >
+                <span className={`absolute inset-0 rounded-full bg-fuchsia-500/20 blur-md ${showFab ? 'opacity-60' : 'opacity-40'} animate-pulse`} aria-hidden></span>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="relative text-white drop-shadow">
+                  <path d="M12 3c-2 0-3.8 1.2-4.5 3C5.2 6.4 4 7.9 4 9.7c0 1.9 1.4 3.5 3.2 3.8C7.9 17 9.7 19 12 19s4.1-2 4.8-5.5c1.8-.3 3.2-2 3.2-3.8 0-1.8-1.2-3.3-3.5-3.7-.7-1.8-2.5-3-4.5-3Z" />
+                  <path d="M9 22c1 .6 2 .9 3 .9s2-.3 3-.9" />
+                </svg>
+              </button>
+              {showFab && (
+                <div className="absolute bottom-[110%] right-0">
+                  <div id="anime-fab-panel" role="dialog" aria-modal="false" className="bg-slate-900/90 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-md p-3 w-64">
+                    <div className="px-1 pb-2">
+                      <p className="text-[11px] text-white/60">Explora más contenido de anime</p>
+                    </div>
+                    <button
+                      onClick={openAllNewsPage}
+                      className="w-full flex items-center justify-between gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white text-sm font-semibold shadow-lg hover:shadow-fuchsia-500/30 transition group"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="inline-block w-6 h-6 rounded-full bg-white/10 grid place-items-center">
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </span>
+                        Ver todas las noticias
+                      </span>
+                      <span className="text-white/80 group-hover:translate-x-0.5 transition">→</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         {loading && <div className="text-center text-cyan-300">Cargando noticias…</div>}
