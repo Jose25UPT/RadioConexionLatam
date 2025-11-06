@@ -90,13 +90,19 @@ export default function News() {
           {showFab && (
             <button aria-hidden className="fixed inset-0 z-20" onClick={() => setShowFab(false)} />
           )}
+          {/* Etiqueta sutil junto al FAB */}
+          {!showFab && (
+            <div className="fixed bottom-8 right-24 md:bottom-10 md:right-28 z-30 pointer-events-none select-none">
+              <span className="px-2.5 py-1 rounded-full bg-white/10 text-white/80 text-[11px] border border-white/10 backdrop-blur-sm">abre aquí</span>
+            </div>
+          )}
           <button
             type="button"
             aria-label={showFab ? 'Cerrar panel de anime' : 'Abrir panel de anime'}
             aria-expanded={showFab}
             aria-controls="anime-fab-panel"
             onClick={() => setShowFab(v => !v)}
-            className="fixed bottom-6 right-6 lg:absolute lg:bottom-auto lg:right-6 lg:top-1/2 lg:-translate-y-1/2 w-14 h-14 rounded-full overflow-hidden grid place-items-center bg-gradient-to-br from-blue-600 to-fuchsia-700 text-white shadow-2xl shadow-fuchsia-700/30 border border-white/10 ring-2 ring-white/10 hover:ring-white/20 transition transform hover:scale-105 z-30"
+            className="fixed bottom-6 right-6 md:bottom-8 md:right-8 w-14 h-14 rounded-full overflow-hidden grid place-items-center bg-gradient-to-br from-blue-600 to-fuchsia-700 text-white shadow-2xl shadow-fuchsia-700/30 border border-white/10 ring-2 ring-white/10 hover:ring-white/20 transition transform hover:scale-105 z-30"
           >
             {/* Aura animada */}
             <span className={`absolute inset-0 rounded-full bg-fuchsia-500/20 blur-md ${showFab ? 'opacity-60' : 'opacity-40'} animate-pulse`} aria-hidden></span>
@@ -108,7 +114,7 @@ export default function News() {
           </button>
           {/* Panel emergente */}
           {showFab && (
-            <div className="fixed bottom-24 right-6 lg:absolute lg:bottom-auto lg:right-24 lg:top-1/2 lg:-translate-y-1/2 z-30">
+            <div className="fixed bottom-24 right-6 md:right-8 z-30">
               <div id="anime-fab-panel" role="dialog" aria-modal="false" className="bg-slate-900/90 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-md p-3 w-60">
                 <div className="px-1 pb-2">
                   <p className="text-[11px] text-white/60">Explora más contenido de anime</p>
