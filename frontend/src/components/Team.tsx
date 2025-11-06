@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { Mail, Phone, Instagram, Twitter, Award  , Heart } from 'lucide-react';
+import { Instagram, Twitter } from 'lucide-react';
 
 interface TeamMember {
   id: number;
@@ -18,8 +17,7 @@ interface TeamMember {
 }
 
 export default function Team() {
-  const [hoveredMember, setHoveredMember] = useState<number | null>(null);
-
+  // Diseño editorial minimal: bloques alternos imagen/texto, sin interactividad adicional
   const team: TeamMember[] = [
     {
       id: 1,
@@ -84,143 +82,55 @@ export default function Team() {
   ];
 
   return (
-    <section id="equipo" className="py-20 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Elementos decorativos de fondo */}
-      <div className="absolute inset-0">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-pink-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-indigo-500/20 rounded-full blur-2xl animate-pulse"></div>
-        <div className="absolute top-1/4 right-1/4 w-28 h-28 bg-cyan-500/20 rounded-full blur-3xl animate-pulse"></div>
-      </div>
+    <section id="equipo" className="py-24 bg-gradient-to-br from-slate-900 via-purple-800 to-slate-800">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <header className="mb-14">
+          <p className="text-sm uppercase tracking-widest text-white/50">Equipo</p>
+          <h2 className="mt-2 text-4xl md:text-5xl font-extrabold text-white tracking-tight">Las personas detrás de la radio</h2>
+          <div className="mt-4 h-px w-24 bg-gradient-to-r from-fuchsia-500 to-cyan-500" />
+          <p className="mt-6 text-lg text-white/70 max-w-3xl leading-relaxed">Un equipo pequeño, cercano y apasionado por la música y la cultura latina. Conócelos en un formato claro y directo.</p>
+        </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Header Section */}
-        <div className="text-center mb-20">
-          <div className="inline-flex items-center justify-center p-3 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl mb-6 backdrop-blur-sm border border-purple-500/30">
-          </div>
-          <h2 className="text-6xl md:text-7xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent mb-6 tracking-tight">
-            Nuestro Equipo
-          </h2>
-          <p className="text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-            Las <span className="text-purple-400 font-bold">voces</span> y 
-            <span className="text-pink-400 font-bold"> talentos</span> que dan vida a 
-            <span className="text-cyan-400 font-bold"> Radio Conexión Latam</span>
-          </p>
-          <div className="mt-8 flex justify-center">
-          </div>
-        </div>
-
-        {/* Team Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {team.map((member, index) => (
-            <div
-              key={member.id}
-              className="group relative"
-              onMouseEnter={() => setHoveredMember(member.id)}
-              onMouseLeave={() => setHoveredMember(null)}
-            >
-              {/* Card Container */}
-              <div className="relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm rounded-3xl overflow-hidden border border-purple-500/20 hover:border-purple-400/40 transition-all duration-500 transform hover:-translate-y-4 hover:shadow-2xl hover:shadow-purple-500/25">
-                
-                {/* Image Section */}
-                <div className="relative h-80 overflow-hidden">
-                  <img
-                    src={member.image}
-                    alt={member.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/60 to-transparent"></div>
-                  
-                  {/* Experience Badge */}
-                  <div className="absolute top-4 right-4">
-                    <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-full px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
-                      <Award className="h-3 w-3 inline mr-1" />
-                      {member.experience}
-                    </div>
-                  </div>
-
-                  {/* Social Media */}
-                  <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="flex space-x-2">
-                      {member.social.instagram && (
-                        <a 
-                          href={`https://instagram.com/${member.social.instagram.replace('@', '')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-gradient-to-r from-purple-600/80 to-pink-600/80 backdrop-blur-sm p-2 rounded-full text-white hover:from-purple-500 hover:to-pink-500 transition-all duration-300 transform hover:scale-110"
-                        >
-                          <Instagram className="h-4 w-4" />
-                        </a>
-                      )}
-                      {member.social.twitter && (
-                        <a 
-                          href={`https://twitter.com/${member.social.twitter.replace('@', '')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-gradient-to-r from-blue-600/80 to-cyan-600/80 backdrop-blur-sm p-2 rounded-full text-white hover:from-blue-500 hover:to-cyan-500 transition-all duration-300 transform hover:scale-110"
-                        >
-                          <Twitter className="h-4 w-4" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Hover Effect Lines */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
-                </div>
-                
-                {/* Content Section */}
-                <div className="p-6 space-y-4">
-                  {/* Name and Role */}
-                  <div className="text-center">
-                    <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-purple-300 transition-colors duration-300">
-                      {member.name}
-                    </h3>
-                    <p className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 font-bold text-lg">
-                      {member.role}
-                    </p>
-                    <div className="mt-2 text-sm text-cyan-400 font-medium">
-                      {member.specialty}
-                    </div>
-                  </div>
-                  
-                  {/* Bio */}
-                  <p className="text-gray-300 text-sm leading-relaxed text-center">
-                    {member.bio}
-                  </p>
-                  
-                  {/* Contact Info - Hidden by default, shown on hover */}
-                  <div className="space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="flex items-center justify-center space-x-2 text-gray-400 text-xs">
-                      <div className="bg-purple-600/20 p-1.5 rounded-full">
-                        <Mail className="h-3 w-3 text-purple-400" />
-                      </div>
-                      <span className="truncate">{member.email}</span>
-                    </div>
-                    <div className="flex items-center justify-center space-x-2 text-gray-400 text-xs">
-                      <div className="bg-pink-600/20 p-1.5 rounded-full">
-                        <Phone className="h-3 w-3 text-pink-400" />
-                      </div>
-                      <span>{member.phone}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Shine Effect */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div className="absolute top-0 -left-4 w-4 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-1000"></div>
+        <div className="space-y-14">
+          {team.map((m, i) => (
+            <article key={m.id} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className={`lg:col-span-5 ${i % 2 === 1 ? 'lg:order-2' : ''}`}>
+                <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                  <img src={m.image} alt={`Foto de ${m.name}`} className="w-full h-72 object-cover" />
                 </div>
               </div>
-
-              {/* Floating Number */}
-              <div className="absolute -top-4 -left-4 w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg">
-                {index + 1}
+              <div className={`lg:col-span-7 ${i % 2 === 1 ? 'lg:order-1' : ''}`}>
+                <h3 className="text-2xl md:text-3xl font-bold text-white">{m.name}</h3>
+                <p className="mt-1 text-base font-semibold bg-gradient-to-r from-purple-300 to-pink-300 text-transparent bg-clip-text">{m.role}</p>
+                <p className="mt-1 text-sm text-cyan-300">{m.specialty} • {m.experience}</p>
+                <p className="mt-4 text-white/80 leading-relaxed">{m.bio}</p>
+                <div className="mt-5 flex gap-3">
+                  {m.social.instagram && (
+                    <a
+                      href={`https://instagram.com/${m.social.instagram.replace('@','')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-2 rounded-xl bg-white/10 text-white border border-white/10 hover:bg-white/15 text-sm"
+                    >
+                      <Instagram className="w-4 h-4 inline mr-1" /> Instagram
+                    </a>
+                  )}
+                  {m.social.twitter && (
+                    <a
+                      href={`https://twitter.com/${m.social.twitter.replace('@','')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-2 rounded-xl bg-white/10 text-white border border-white/10 hover:bg-white/15 text-sm"
+                    >
+                      <Twitter className="w-4 h-4 inline mr-1" /> Twitter
+                    </a>
+                  )}
+                </div>
               </div>
-            </div>
+            </article>
           ))}
         </div>
+        <div className="mt-16 h-px w-full bg-white/10" />
       </div>
     </section>
   );

@@ -70,8 +70,19 @@ export default function Footer() {
         {/* Bottom Section */}
         <div className="border-t border-white/20 mt-6 pt-6">
           <div className="text-center text-sm text-gray-400 space-y-1">
-            <p className="font-semibold text-base tracking-wide">Varnox Tech.</p>
-            <p>© 2025 Todos los derechos reservados.</p>
+            <p className="font-extrabold text-base tracking-wide text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.55)] brightness-125">
+              Varnox Tech.
+            </p>
+              <p className="flex items-center justify-center gap-2">
+                © 2025 Todos los derechos reservados.
+                <img
+                  src="/logovarnox.png"
+                  alt="Varnox Tech"
+                  className="h-4 w-auto opacity-80"
+                  loading="lazy"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                />
+              </p>
           </div>
         </div>
       </div>
