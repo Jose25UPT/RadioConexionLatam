@@ -21,8 +21,7 @@ export default function Header({ isMenuOpen, setIsMenuOpen }: HeaderProps) {
     { name: 'Programas', href: isHomePage ? '#programas' : '/#programas', type: isHomePage ? 'anchor' : 'link' },
     { name: 'Noticias', href: '/noticias', type: 'link' },
     { name: 'Redes Sociales', href: isHomePage ? '#redes' : '/#redes', type: isHomePage ? 'anchor' : 'link' },
-    { name: 'Equipo', href: isHomePage ? '#equipo' : '/#equipo', type: isHomePage ? 'anchor' : 'link' },
-    { name: 'Contacto', href: isHomePage ? '#contacto' : '/#contacto', type: isHomePage ? 'anchor' : 'link' }
+    { name: 'Equipo', href: isHomePage ? '#equipo' : '/#equipo', type: isHomePage ? 'anchor' : 'link' }
   ];
 
   return (
