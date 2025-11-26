@@ -42,9 +42,12 @@ export default function AudioPlayer({ onToggleVisibility }: AudioPlayerProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // URLs correctas de Radio Conexión Latam
-  const streamUrl = "https://stream-170.zeno.fm/yxynr8zy71zuv?zs=CBt9_4NJR0S-g7RGQMMwYA";
-  const metadataUrl = "https://api.zeno.fm/mounts/metadata/subscribe/2t6pyzccd78uv";
+  // URL de reproducción (AsuraHosting) — ofuscada para no estar visible en texto plano
+  // Nota: en frontend no se puede ocultar completamente; para ocultar de verdad, usar proxy en backend.
+  // URL de reproducción directa (AsuraHosting)
+  const streamUrl = "https://a13.asurahosting.com/listen/radio_conexi%C3%B3n_latam/radio.mp3";
+  // Metadata desactivada por ahora (sin UI adicional)
+  const metadataUrl: string | null = null;
   
   // Función para sincronizar el estado con el audio global
   const syncPlayingState = () => {
@@ -56,35 +59,28 @@ export default function AudioPlayer({ onToggleVisibility }: AudioPlayerProps) {
   // Inicializar audio global
   useEffect(() => {
     if (!globalAudio) {
-      globalAudio = new Audio(streamUrl);
-      globalAudio.volume = volume;
+      globalAudio = new Audio();
+      globalAudio.crossOrigin = 'anonymous';
       globalAudio.preload = 'none';
-      
-      // Event listeners para el audio global
-      globalAudio.addEventListener('play', () => {
-        console.log('Audio started playing');
-        setIsPlaying(true);
-      });
-      globalAudio.addEventListener('pause', () => {
-        console.log('Audio paused');
-        setIsPlaying(false);
-      });
-      globalAudio.addEventListener('ended', () => {
-        console.log('Audio ended');
-        setIsPlaying(false);
-      });
-      globalAudio.addEventListener('error', (e) => {
+      globalAudio.src = streamUrl + `?nocache=${Date.now()}`;
+      globalAudio.volume = volume;
+
+      const onPlay = () => { setIsPlaying(true); };
+      const onPause = () => { setIsPlaying(false); };
+      const onEnded = () => { setIsPlaying(false); };
+      const onError = (e: any) => {
         console.error('Audio error:', e);
         setIsPlaying(false);
-      });
-      globalAudio.addEventListener('loadstart', () => {
-        console.log('Audio loading started');
-        syncPlayingState();
-      });
-      globalAudio.addEventListener('canplay', () => {
-        console.log('Audio can play');
-        syncPlayingState();
-      });
+      };
+      const onLoadStart = () => { syncPlayingState(); };
+      const onCanPlay = () => { syncPlayingState(); };
+
+      globalAudio.addEventListener('play', onPlay);
+      globalAudio.addEventListener('pause', onPause);
+      globalAudio.addEventListener('ended', onEnded);
+      globalAudio.addEventListener('error', onError);
+      globalAudio.addEventListener('loadstart', onLoadStart);
+      globalAudio.addEventListener('canplay', onCanPlay);
     }
   }, []);
 
@@ -116,50 +112,40 @@ export default function AudioPlayer({ onToggleVisibility }: AudioPlayerProps) {
     }
   }, [volume, isMuted]);
 
-  // Manejar oyentes simulados + metadata en tiempo real
+  // Manejar oyentes simulados y metadata (si disponible)
   useEffect(() => {
-    // Simular cambios de oyentes cada 5 segundos
     const interval = setInterval(() => {
       setListeners(prev => prev + Math.floor(Math.random() * 10) - 5);
     }, 5000);
 
-    // Escuchar metadata en tiempo real desde Zeno.fm
-    const eventSource = new EventSource(metadataUrl);
-
-    eventSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        console.log('Metadata received:', data);
-
-        if (data.streamTitle) {
-          const cleaned = data.streamTitle.replace(/_/g, ' ').trim();
-          setCurrentShow(cleaned);
-          console.log('Program updated:', cleaned);
+    let eventSource: EventSource | null = null;
+    if (metadataUrl) {
+      eventSource = new EventSource(metadataUrl);
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.streamTitle) {
+            const cleaned = data.streamTitle.replace(/_/g, ' ').trim();
+            setCurrentShow(cleaned);
+          }
+          if (data.artist && data.title) {
+            setCurrentSong(`${data.artist} - ${data.title}`);
+          } else if (data.title) {
+            setCurrentSong(data.title);
+          }
+        } catch (error) {
+          console.log('Error parsing metadata:', error);
         }
+      };
+      eventSource.onerror = (error) => {
+        console.log('EventSource error:', error);
+        eventSource?.close();
+      };
+    }
 
-        if (data.artist && data.title) {
-          setCurrentSong(`${data.artist} - ${data.title}`);
-        } else if (data.title) {
-          setCurrentSong(data.title);
-        } else if (data.song) {
-          setCurrentSong(data.song);
-        } else if (data.track) {
-          setCurrentSong(data.track);
-        }
-      } catch (error) {
-        console.log('Error parsing metadata:', error);
-      }
-    };
-
-    eventSource.onerror = (error) => {
-      console.log('EventSource error:', error);
-      eventSource.close();
-    };
-
-    // Limpiar al desmontar
     return () => {
       clearInterval(interval);
-      eventSource.close();
+      eventSource?.close();
     };
   }, []);
 
@@ -169,6 +155,8 @@ export default function AudioPlayer({ onToggleVisibility }: AudioPlayerProps) {
     try {
       if (globalAudio.paused) {
         console.log('Attempting to play audio...');
+        // asegurar recarga antes de reproducir
+        globalAudio.load();
         await globalAudio.play();
         setIsPlaying(true);
       } else {
@@ -440,6 +428,8 @@ export default function AudioPlayer({ onToggleVisibility }: AudioPlayerProps) {
                   <Share2 className="h-6 w-6" />
                 </button>
               </div>
+
+              {/* Sin reproductor embebido (solo audio nativo) */}
 
               {/* Volume Control */}
               <div className="flex items-center space-x-4">
