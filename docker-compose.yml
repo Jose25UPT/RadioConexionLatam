@@ -63,6 +63,7 @@ services:
       FC_RECAPTCHA_SECRET_KEY: ${FC_RECAPTCHA_SECRET_KEY}
       FC_RECAPTCHA_SITE_KEY: ${FC_RECAPTCHA_SITE_KEY}
       FC_APP_BASE: /FANS-CHOICE
+      FC_GOOGLE_REDIRECT_URI: https://www.radioconexionlatam.net.pe/FANS-CHOICE/auth.php
     volumes:
       - ./fans-choice:/var/www/html
     networks:
