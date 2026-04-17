@@ -48,7 +48,9 @@ services:
       - radio_net
 
   fans-choice:
-    image: php:8.3-apache
+    build:
+      context: ./fans-choice
+      dockerfile: Dockerfile
     container_name: radio_fans_choice
     restart: always
     environment:
