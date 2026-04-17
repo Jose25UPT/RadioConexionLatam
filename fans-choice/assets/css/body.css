@@ -1,0 +1,269 @@
+/* ============================================================
+   BODY.CSS — Página de votación + estilos globales de página
+   ============================================================ */
+
+/* 1. BODY GLOBAL */
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(160deg, #f5f0fa 0%, #ede8f5 40%, #e8f5e9 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: #2d2d2d;
+}
+
+main { flex: 1; }
+
+/* 2. TÍTULO PRINCIPAL DE VOTACIÓN */
+main > h2 {
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #5B2C6F;
+  margin: 2.5rem 1rem 2rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+main > h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #8E44AD, #ffd700);
+  border-radius: 2px;
+}
+
+/* 3. TARJETA DE CATEGORÍA */
+.reportero-container {
+  position: relative;
+  width: 92%;
+  max-width: 1000px;
+  margin: 1.8rem auto;
+  padding: 2rem 2rem 1.5rem;
+  background: #fff;
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 4px 24px rgba(91, 44, 111, 0.10);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+.reportero-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #5B2C6F, #8E44AD, #ffd700);
+}
+.reportero-container:hover {
+  box-shadow: 0 8px 32px rgba(91, 44, 111, 0.18);
+  transform: translateY(-2px);
+}
+
+/* Tarjeta ya votada — borde verde */
+.reportero-container.votado::before {
+  background: linear-gradient(90deg, #2ecc71, #4CAF50, #a8e063);
+}
+.reportero-container.votado {
+  background: linear-gradient(160deg, #fff 80%, #f0fff4 100%);
+}
+
+/* Título de categoría */
+.reportero-container h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #5B2C6F;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.5px;
+}
+
+/* 4. GRID DE CANDIDATOS */
+.candidatos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem 2rem;
+}
+
+/* 5. CANDIDATO */
+.candidato {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 12px;
+  transition: background 0.2s ease;
+}
+.candidato:hover { background: rgba(142, 68, 173, 0.05); }
+
+.candidato img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #e0d0f0;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+.candidato img:hover {
+  border-color: #8E44AD;
+  box-shadow: 0 0 14px rgba(142, 68, 173, 0.35);
+  transform: scale(1.04);
+}
+
+/* Estado seleccionado */
+.candidato img.selected {
+  border-color: #ffd700;
+  box-shadow: 0 0 20px 4px rgba(255, 215, 0, 0.6);
+  transform: scale(1.07);
+}
+.candidato.votado-candidato img {
+  border-color: #4CAF50;
+  box-shadow: 0 0 16px rgba(76, 175, 80, 0.5);
+  transform: scale(1.07);
+}
+
+.candidato p {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #444;
+  margin-top: 0.6rem;
+  max-width: 150px;
+  line-height: 1.3;
+}
+
+/* Ocultar radio buttons */
+.hidden-radio { display: none; }
+
+/* 6. BOTÓN VOTAR */
+.btn-votar {
+  display: block;
+  margin: 1.8rem auto 0;
+  padding: 0.75rem 2.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #8E44AD, #5B2C6F);
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 14px rgba(91, 44, 111, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+}
+.btn-votar:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 8px 20px rgba(91, 44, 111, 0.5);
+  background: linear-gradient(135deg, #5B2C6F, #3d1a57);
+}
+.btn-votar:active { transform: scale(0.97); }
+
+/* 7. TEXTO "RESULTADO REGISTRADO" */
+.votado-text {
+  text-align: center;
+  font-weight: 700;
+  color: #2ecc71;
+  font-size: 1rem;
+  margin-top: 1rem;
+  letter-spacing: 0.3px;
+}
+.votado-text::before { content: '✓ '; }
+
+/* 8. BADGE DE RESULTADO */
+.vote-result {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background: radial-gradient(circle, #ffd700, #f39c12);
+  border-radius: 50%;
+  margin-left: 8px;
+  vertical-align: middle;
+  box-shadow: 0 0 6px rgba(255,215,0,0.6);
+}
+
+/* 9. RESPONSIVE */
+@media (max-width: 768px) {
+  .reportero-container {
+    width: 96%;
+    padding: 1.5rem 1rem;
+    margin: 1.2rem auto;
+  }
+  .reportero-container h3 { font-size: 1.2rem; }
+  .candidato img { width: 120px; height: 120px; }
+  .candidato p { font-size: 0.8rem; max-width: 120px; }
+  .btn-votar { padding: 0.7rem 2rem; font-size: 0.95rem; }
+  main > h2 { font-size: 1.6rem; letter-spacing: 1px; }
+}
+
+@media (max-width: 420px) {
+  .candidato img { width: 100px; height: 100px; }
+  .candidatos { gap: 1rem; }
+}
+
+/* 10. FOOTER */
+.site-footer {
+  background: linear-gradient(135deg, #3d1a57 0%, #5B2C6F 100%);
+  color: #fff;
+  padding: 2rem 1.5rem 1.5rem;
+  margin-top: auto;
+  width: 100%;
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  text-align: center;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.footer-logo img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.35);
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.5rem;
+}
+.footer-links a {
+  color: #e0c8f8;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+.footer-links a:hover { color: #ffd700; }
+
+.footer-copy {
+  font-size: 0.82rem;
+  opacity: 0.7;
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .footer-links { flex-direction: column; align-items: center; gap: 0.5rem; }
+  .footer-logo { font-size: 0.95rem; }
+}

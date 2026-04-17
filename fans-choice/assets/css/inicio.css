@@ -1,0 +1,88 @@
+/* ============================================================
+   INICIO.CSS — Estilos compartidos para páginas de contenido
+   (términos, políticas, menciones honoríficas)
+   ============================================================ */
+
+/* Contenedor de página de contenido */
+.terms-container,
+.content-page {
+    max-width: 820px;
+    margin: 3rem auto;
+    padding: 2.5rem 2rem;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 6px 30px rgba(91,44,111,0.10);
+    position: relative;
+    /* sin overflow:hidden para no bloquear scroll en móvil */
+}
+/* Barra de acento superior */
+.terms-container::before,
+.content-page::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #5B2C6F, #8E44AD, #ffd700);
+    border-radius: 16px 16px 0 0;
+}
+
+.terms-container h2,
+.content-page h2 {
+    color: #5B2C6F;
+    font-size: 1.9rem;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.terms-container h3,
+.content-page h3 {
+    color: #5B2C6F;
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 1.5rem 0 0.5rem;
+    padding-left: 0.6rem;
+    border-left: 3px solid #8E44AD;
+}
+
+.terms-container p,
+.content-page p {
+    color: #555;
+    font-size: 1rem;
+    line-height: 1.75;
+    margin-bottom: 1rem;
+    text-align: justify;
+}
+
+.terms-container ul,
+.content-page ul {
+    margin: 0 0 1rem 1.5rem;
+}
+.terms-container li,
+.content-page li {
+    color: #555;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.terms-container a,
+.content-page a {
+    color: #8E44AD;
+    font-weight: 600;
+    text-decoration: underline;
+}
+.terms-container a:hover,
+.content-page a:hover {
+    color: #5B2C6F;
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .terms-container,
+    .content-page { margin: 1.5rem 1rem; padding: 1.5rem 1rem; }
+    .terms-container h2,
+    .content-page h2 { font-size: 1.5rem; }
+}

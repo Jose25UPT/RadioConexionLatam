@@ -51,6 +51,15 @@ services:
     image: php:8.3-apache
     container_name: radio_fans_choice
     restart: always
+    environment:
+      FC_DB_HOST: ${FC_DB_HOST}
+      FC_DB_NAME: ${FC_DB_NAME}
+      FC_DB_USER: ${FC_DB_USER}
+      FC_DB_PASSWORD: ${FC_DB_PASSWORD}
+      FC_GOOGLE_CLIENT_ID: ${FC_GOOGLE_CLIENT_ID}
+      FC_GOOGLE_CLIENT_SECRET: ${FC_GOOGLE_CLIENT_SECRET}
+      FC_RECAPTCHA_SECRET_KEY: ${FC_RECAPTCHA_SECRET_KEY}
+      FC_RECAPTCHA_SITE_KEY: ${FC_RECAPTCHA_SITE_KEY}
     volumes:
       - ./fans-choice:/var/www/html
     networks:

@@ -1,0 +1,18 @@
+Options -Indexes
+RewriteEngine On
+
+# No reescribir archivos o directorios que existan físicamente
+# (auth.php, logout.php, assets/, vendor/, etc. se sirven directamente)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Todo lo demás pasa por el router index.php
+RewriteRule ^ index.php [L,QSA]
+
+# ── Cabeceras de seguridad HTTP ───────────────────────────────────────────────
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "DENY"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>

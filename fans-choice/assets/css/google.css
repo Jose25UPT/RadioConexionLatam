@@ -1,0 +1,64 @@
+/* ============================================================
+   GOOGLE.CSS — Botón de login con Google + info de usuario
+   ============================================================ */
+
+.google-login-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.75rem 1.8rem;
+  background: #fff;
+  color: #3c3c3c;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 8px;
+  border: 1.5px solid #dadce0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+}
+.google-login-button:hover {
+  box-shadow: 0 4px 16px rgba(66,133,244,0.2);
+  border-color: #4285F4;
+  transform: translateY(-1px);
+}
+.google-login-button:active { transform: scale(0.98); }
+
+.google-icon {
+  height: 22px;
+  width: 22px;
+}
+
+/* Info usuario en header */
+.user-details { display: flex; align-items: center; gap: 0.5rem; }
+.user-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffd700;
+}
+
+.logout-button {
+  display: inline-block;
+  padding: 0.45rem 1.1rem;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 3px 8px rgba(231,76,60,0.35);
+}
+.logout-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 14px rgba(231,76,60,0.5);
+}
+
+@media (max-width: 768px) {
+  .google-login-button {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.95rem;
+  }
+}

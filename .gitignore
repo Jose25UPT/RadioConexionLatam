@@ -14,6 +14,9 @@ node_modules/
 /dist/
 **/dist/
 
+# PHP Composer dependencies
+fans-choice/vendor/
+
 # OS/editor noise
 .DS_Store
 .vscode/*
