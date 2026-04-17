@@ -47,6 +47,15 @@ services:
     networks:
       - radio_net
 
+  fans-choice:
+    image: php:8.3-apache
+    container_name: radio_fans_choice
+    restart: always
+    volumes:
+      - ./fans-choice:/var/www/html
+    networks:
+      - radio_net
+
   caddy:
     image: caddy:2.7
     container_name: radio_caddy

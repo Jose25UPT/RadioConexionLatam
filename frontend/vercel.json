@@ -17,6 +17,8 @@
       ],
       "destination": "/api/share-meta?slug=$1"
     },
+    { "source": "/FANS-CHOICE", "destination": "https://api.radioconexionlatam.net.pe/fans-choice/" },
+    { "source": "/FANS-CHOICE/(.*)", "destination": "https://api.radioconexionlatam.net.pe/fans-choice/$1" },
     { "source": "/noticias", "destination": "/index.html" },
     { "source": "/noticia/(.*)", "destination": "/index.html" },
     { "source": "/secure_panel_rva_gestor_2025/(.*)", "destination": "/index.html" }

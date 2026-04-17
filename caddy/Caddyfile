@@ -16,12 +16,19 @@ api.radioconexionlatam.net.pe {
     Access-Control-Allow-Credentials true
   }
 
-  # Proxy a la app FastAPI del servicio 'backend'
-  reverse_proxy backend:8000
+  # Proyecto PHP fans-choice
+  @fans-choice path /fans-choice*
+  handle @fans-choice {
+    uri strip_prefix /fans-choice
+    reverse_proxy fans-choice:80
+  }
 
   # Health endpoint opcional
   @health path /health
   handle @health {
     respond "ok" 200
   }
+
+  # Proxy a la app FastAPI del servicio 'backend'
+  reverse_proxy backend:8000
 }
