@@ -62,6 +62,7 @@ services:
       FC_GOOGLE_CLIENT_SECRET: ${FC_GOOGLE_CLIENT_SECRET}
       FC_RECAPTCHA_SECRET_KEY: ${FC_RECAPTCHA_SECRET_KEY}
       FC_RECAPTCHA_SITE_KEY: ${FC_RECAPTCHA_SITE_KEY}
+      FC_APP_BASE: /FANS-CHOICE
     volumes:
       - ./fans-choice:/var/www/html
     networks:

@@ -6,8 +6,13 @@
  * en local (/radiolatam/Fans-Choice) como en producción (/ o /fans-choice).
  */
 if (!defined('APP_BASE')) {
-    $script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '/index.php');
-    $dir    = dirname($script);
-    $dir    = ($dir === '/' || $dir === '.') ? '' : rtrim($dir, '/');
-    define('APP_BASE', $dir);
+    $envBase = getenv('FC_APP_BASE');
+    if ($envBase !== false && $envBase !== '') {
+        define('APP_BASE', rtrim($envBase, '/'));
+    } else {
+        $script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '/index.php');
+        $dir    = dirname($script);
+        $dir    = ($dir === '/' || $dir === '.') ? '' : rtrim($dir, '/');
+        define('APP_BASE', $dir);
+    }
 }
