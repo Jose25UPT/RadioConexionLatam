@@ -36,8 +36,10 @@ require_once dirname(__DIR__, 2) . '/config/app.php';
             <ul>
                 <li><a href="https://www.radioconexionlatam.net.pe/" class="btn-back">&#8592; Visítanos</a></li>
                 <li><a href="<?php echo APP_BASE; ?>/">Inicio</a></li>
+                <?php /* Ocultos por solicitud del cliente — no eliminar
                 <li><a href="https://docs.google.com/document/d/1yt-MV8csmsN7eWlvLPHZg23YgefnbLeGnJrWIWm2guc/edit?tab=t.0" target="_blank">Bases del Reglamento</a></li>
                 <li><a href="<?php echo APP_BASE; ?>/assets/LATAM Awards - Fans Choice 2025 Bases.pdf" download="LATAM Awards - Fans Choice 2025 Bases.pdf">Descargar Bases PDF</a></li>
+                */ ?>
             </ul>
         </nav>
     </header>
