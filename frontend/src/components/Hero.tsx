@@ -53,8 +53,7 @@ export default function Hero({ onPlayLive }: HeroProps) {
           </h1>
           
           <p className="text-xl md:text-3xl mb-12 text-purple-100 max-w-4xl mx-auto leading-relaxed font-light">
-            Conectando corazones latinos a través de la música. 
-            <span className="block mt-2 text-pink-300 font-medium">Tu ritmo, tu pasión, tu conexión.</span>
+            Siempre conectados
           </p>
           
           {/* CTA Buttons */}
