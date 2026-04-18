@@ -58,7 +58,7 @@ foreach ($votosPrevios as $voto) {
 // Formato: id => ['Nombre mostrado', 'carpeta en assets/img', ['imagen1', ...]]
 $categorias_con_candidatos = [
     1  => ['Cosplayer',              'Cosplayer',              [
-        '1 milcarastacna.jpg',
+        'Milcarastacna.jpg',
         'Arthur.jpg',
         'BrutuS.jpg',
         'Tora 7.jpg',

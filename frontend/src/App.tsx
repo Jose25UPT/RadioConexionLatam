@@ -3,6 +3,7 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import Programs from './components/Programs';
 import News from './components/News';
+import FansChoiceBanner from './components/FansChoiceBanner';
 import NewsDetailModern from './components/NewsDetailModern';
 import AllNewsModern from './components/AllNewsModern';
 import SocialMedia from './components/SocialMedia';
@@ -162,6 +163,7 @@ function App() {
               <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
               <Hero onPlayLive={handlePlayLive} />
               <Programs />
+              <FansChoiceBanner />
               <News />
               <SocialMedia />
               <Team />
