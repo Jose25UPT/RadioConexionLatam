@@ -43,6 +43,12 @@ $routes = [
     'logout'          => ['view',       'logout.php'],
 ];
 
+// ── Bloqueo de rutas de votación si está cerrada ─────────────────────────────
+if (VOTACION_CERRADA && in_array($request_uri, ['votacion', 'procesar_voto', 'logout'])) {
+    header('Location: ' . APP_BASE . '/');
+    exit();
+}
+
 // ── Despacho ──────────────────────────────────────────────────────────────────
 if (!array_key_exists($request_uri, $routes)) {
     http_response_code(404);

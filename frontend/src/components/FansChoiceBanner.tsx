@@ -52,6 +52,15 @@ export default function FansChoiceBanner() {
 
   return (
     <section className="relative overflow-hidden py-0">
+      {/* Badge FINALIZADO */}
+      <div className="absolute top-4 right-4 z-20 md:top-6 md:right-8 pointer-events-none">
+        <div className="relative">
+          <span className="inline-flex items-center gap-1.5 bg-red-600 text-white font-black text-xs md:text-sm uppercase tracking-widest px-4 py-2 rounded-full shadow-lg ring-2 ring-white/40 animate-pulse">
+            🔒 Finalizado
+          </span>
+        </div>
+      </div>
+
       <div
         className={`relative bg-gradient-to-r ${slide.accent} transition-all duration-500`}
         style={{ minHeight: '220px' }}

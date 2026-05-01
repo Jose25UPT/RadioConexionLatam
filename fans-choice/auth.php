@@ -11,6 +11,12 @@ $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->safeLoad();
 
 require_once __DIR__ . '/config/app.php';
+
+if (VOTACION_CERRADA) {
+    header('Location: ' . APP_BASE . '/');
+    exit();
+}
+
 require_once __DIR__ . '/controllers/AuthController.php';
 
 $authController = new AuthController();

@@ -221,6 +221,22 @@ include __DIR__ . '/partials/header.php';
 </style>
 
 <div class="inicio-bg">
+<?php if (VOTACION_CERRADA): ?>
+    <section class="card-inicio">
+        <div class="col-imagen"></div>
+        <div class="col-form" style="align-items:center; text-align:center;">
+            <span style="font-size:3rem;">🏆</span>
+            <h2 style="color:#5B2C6F;">¡Votaciones finalizadas!</h2>
+            <div class="terms-text">
+                <p>Las votaciones de <strong>LATAM Awards - Fans Choice 2025</strong> han concluido.</p>
+                <p>Gracias a todos los que participaron. Los resultados serán anunciados próximamente.</p>
+            </div>
+            <a href="https://www.radioconexionlatam.net.pe/" class="btn-aceptar" style="text-decoration:none; text-align:center;">
+                Volver al inicio
+            </a>
+        </div>
+    </section>
+<?php else: ?>
     <!-- PASO 1: Términos + reCAPTCHA (se oculta si captcha ya fue superado) -->
     <section id="terms-section" class="card-inicio" <?php echo $recaptcha_success ? 'style="display:none"' : ''; ?>>
         <div class="col-imagen"></div>
@@ -240,7 +256,6 @@ include __DIR__ . '/partials/header.php';
                 <p id="captcha-timeout-msg" style="display:none;color:#e67e22;font-size:0.9rem;">
                     ⚠️ El captcha no cargó. Intenta recargar la página o desactiva bloqueadores de anuncios.
                 </p>
-                <!-- El botón inicia desactivado; se habilita solo tras resolver el captcha -->
                 <button id="accept-terms" class="btn-aceptar" type="submit" disabled>
                     Aceptar y continuar
                 </button>
@@ -262,27 +277,24 @@ include __DIR__ . '/partials/header.php';
             </a>
         </div>
     </section>
-</div>
 
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
-<script>
-// Captcha resuelto → habilitar el botón para que el usuario decida cuándo continuar
-function onCaptchaResolved() {
-    const btn = document.getElementById('accept-terms');
-    if (btn) btn.disabled = false;
-}
-
-// Fallback: si el widget no carga en 6 segundos, mostrar aviso y habilitar el botón
-// para no bloquear al usuario (el servidor también aplica fail-open si no llega token)
-setTimeout(() => {
-    const iframe = document.querySelector('.g-recaptcha iframe');
-    const section = document.getElementById('terms-section');
-    if (!iframe && section && section.style.display !== 'none') {
-        document.getElementById('captcha-timeout-msg').style.display = 'block';
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+    function onCaptchaResolved() {
         const btn = document.getElementById('accept-terms');
         if (btn) btn.disabled = false;
     }
-}, 6000);
-</script>
+    setTimeout(() => {
+        const iframe = document.querySelector('.g-recaptcha iframe');
+        const section = document.getElementById('terms-section');
+        if (!iframe && section && section.style.display !== 'none') {
+            document.getElementById('captcha-timeout-msg').style.display = 'block';
+            const btn = document.getElementById('accept-terms');
+            if (btn) btn.disabled = false;
+        }
+    }, 6000);
+    </script>
+<?php endif; ?>
+</div>
 
 <?php include __DIR__ . '/partials/footer.php'; ?>
