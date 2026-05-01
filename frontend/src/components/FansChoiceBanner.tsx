@@ -4,7 +4,7 @@ const SLIDES = [
   {
     label: 'LATAM Awards',
     title: '¡Vota por tu favorito!',
-    subtitle: 'Fans Choice 2025 ya está abierto. Elige a los mejores del año.',
+    subtitle: 'Fans Choice 2026 ya está abierto. Elige a los mejores del año.',
     cta: 'Votar ahora',
     accent: 'from-purple-700 via-fuchsia-700 to-pink-600',
     glow: 'rgba(168,85,247,0.35)',

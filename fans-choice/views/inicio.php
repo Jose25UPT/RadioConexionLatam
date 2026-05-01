@@ -228,7 +228,7 @@ include __DIR__ . '/partials/header.php';
             <span style="font-size:3rem;">🏆</span>
             <h2 style="color:#5B2C6F;">¡Votaciones finalizadas!</h2>
             <div class="terms-text">
-                <p>Las votaciones de <strong>LATAM Awards - Fans Choice 2025</strong> han concluido.</p>
+                <p>Las votaciones de <strong>LATAM Awards - Fans Choice 2026</strong> han concluido.</p>
                 <p>Gracias a todos los que participaron. Los resultados serán anunciados próximamente.</p>
             </div>
             <a href="https://www.radioconexionlatam.net.pe/" class="btn-aceptar" style="text-decoration:none; text-align:center;">
