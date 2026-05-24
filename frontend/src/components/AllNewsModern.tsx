@@ -1,9 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Calendar, User, ChevronLeft, ChevronRight, Heart, MessageCircle,
-  Share2, Clock, Search,
-  Star, Eye, Tag, ArrowUp, Sparkles, Film, Book
+  Calendar, User, ChevronLeft, ChevronRight,
+  Share2, Search,
+  Star, Eye, Tag, ArrowUp, Sparkles, Film, Book, Check
 } from 'lucide-react';
 
 import type { Noticia as NoticiaTipo } from '../types/Noticia';
@@ -16,13 +16,13 @@ export default function AllNewsModern() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(CATEGORIA_TODAS);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'fecha' | 'popularidad' | 'vistas'>('fecha');
   const [currentPage, setCurrentPage] = useState(1);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [allNews, setAllNews] = useState<NoticiaTipo[]>([]);
-  const noticiasPerPage = 6;
+  const noticiasPerPage = 9;
+  const [copiedId, setCopiedId] = useState<number | null>(null);
 
   // Icono por categoría (aprox)
   const CategoriaIcon = ({ nombre }: { nombre?: string }) => {
@@ -57,26 +57,15 @@ export default function AllNewsModern() {
     return [CATEGORIA_TODAS, ...Array.from(set).sort((a, b) => a.localeCompare(b))];
   }, [allNews]);
 
-  // Tags disponibles (uniendo presentes + preset anime)
-  const ANIME_TAGS_PRESET = ['anime','manga','shonen','seinen','shojo','isekai','mecha','hentai','juegos','cosplay','otaku','j-pop','kawaii'];
-  const tagsDisponibles = useMemo(() => {
-    const set = new Set<string>(ANIME_TAGS_PRESET.map(t => t.toLowerCase()));
-    allNews.forEach(n => n.tags?.forEach(t => t && set.add(t.toLowerCase())));
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
-  }, [allNews]);
-
   // Filtrar y ordenar noticias
   const filteredNews = useMemo(() => allNews
     .filter(noticia => {
       const s = searchTerm.trim().toLowerCase();
       const matchesSearch = !s
-        || noticia.titulo.toLowerCase().includes(s)
-        || noticia.contenido.toLowerCase().includes(s)
-        || noticia.tags.some(tag => tag.toLowerCase().includes(s));
+        || (noticia.titulo ?? '').toLowerCase().includes(s)
+        || (noticia.contenido ?? '').toLowerCase().includes(s);
       const matchesCategory = selectedCategory === CATEGORIA_TODAS || noticia.categoria === selectedCategory;
-      const matchesTags = selectedTags.length === 0
-        || noticia.tags.some(tag => selectedTags.includes(tag.toLowerCase()));
-      return matchesSearch && matchesCategory && matchesTags;
+      return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -87,7 +76,7 @@ export default function AllNewsModern() {
         default:
           return new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
       }
-    }), [allNews, searchTerm, selectedCategory, selectedTags, sortBy]);
+    }), [allNews, searchTerm, selectedCategory, sortBy]);
 
   // Paginación
   const totalPages = Math.ceil(filteredNews.length / noticiasPerPage);
@@ -104,7 +93,6 @@ export default function AllNewsModern() {
       titulo: n.titulo,
       categoria: n.categoria,
       slug: n.slug || generateSlug(n.titulo),
-      tag: n.tags?.[0] || n.categoria || 'anime'
     }));
   }, [allNews]);
 
@@ -161,16 +149,24 @@ export default function AllNewsModern() {
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleShare = async (e: React.MouseEvent, noticia: NoticiaTipo) => {
+    e.stopPropagation();
+    const slug = noticia.slug || generateSlug(noticia.titulo);
+    const url = `${window.location.origin}/noticia/${slug}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(noticia.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {}
   };
 
   // Resetear a página 1 cuando cambian filtros/búsqueda
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedCategory, selectedTags]);
+  }, [searchTerm, selectedCategory]);
 
   return (
     <div className="relative min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-50 via-orange-50 to-red-50">
@@ -242,7 +238,7 @@ export default function AllNewsModern() {
                 <input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Buscar noticias de anime, ej: isekai, mecha, cosplay..."
+                  placeholder="Buscar por título o contenido..."
                   className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-stone-200 bg-white outline-none focus:ring-2 focus:ring-amber-300 focus:border-amber-300 text-sm"
                 />
               </div>
@@ -277,7 +273,7 @@ export default function AllNewsModern() {
               {/* Limpiar */}
               <div>
                 <button
-                  onClick={() => { setSearchTerm(''); setSelectedCategory(CATEGORIA_TODAS); setSelectedTags([]); setSortBy('fecha'); }}
+                  onClick={() => { setSearchTerm(''); setSelectedCategory(CATEGORIA_TODAS); setSortBy('fecha'); }}
                   className="px-3 py-2 rounded-lg text-sm border bg-white border-stone-200 text-stone-700 hover:border-amber-300 hover:bg-amber-50"
                 >
                   Limpiar filtros
@@ -302,25 +298,6 @@ export default function AllNewsModern() {
               ))}
             </div>
 
-            {/* Tags de anime */}
-            <div className="flex items-center gap-2 flex-wrap">
-              {tagsDisponibles.map((tag) => {
-                const active = selectedTags.includes(tag);
-                return (
-                  <button
-                    key={tag}
-                    onClick={() => setSelectedTags((prev) => active ? prev.filter(t => t !== tag) : [...prev, tag])}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs ${
-                      active
-                        ? 'bg-stone-900 text-white border-stone-900'
-                        : 'bg-white text-stone-700 border-stone-200 hover:border-stone-300'
-                    }`}
-                  >
-                    <Tag className="w-3 h-3" /> {tag}
-                  </button>
-                );
-              })}
-            </div>
           </div>
           {/* Grid View */}
           {viewMode === 'grid' && (
@@ -350,11 +327,6 @@ export default function AllNewsModern() {
                         </span>
                       )}
                     </div>
-                    <div className="absolute top-4 right-4">
-                      <span className="bg-black/40 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs flex items-center gap-1 border border-white/20">
-                        <Clock className="w-3 h-3" />{noticia.tiempo_lectura ?? 0}m
-                      </span>
-                    </div>
                     <div className="absolute bottom-4 left-4 right-4">
                       <h2 className="text-white font-extrabold text-xl font-['Cinzel'] line-clamp-2 group-hover:text-amber-200 transition-colors duration-300 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]">
                         {noticia.titulo}
@@ -362,26 +334,35 @@ export default function AllNewsModern() {
                     </div>
                   </div>
                   <div className="p-6">
-                    <div className="flex items-center gap-4 mb-4 text-xs text-stone-500">
+                    <div className="flex items-center gap-3 mb-3 text-xs text-stone-400">
                       <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(noticia.fecha).toLocaleDateString('es-ES')}</span>
                       <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{noticia.vistas.toLocaleString()}</span>
                     </div>
-                    <p className="text-stone-600 text-sm leading-relaxed font-['Cormorant_Garamond'] line-clamp-3 mb-4">{truncateWords(noticia.resumen || noticia.contenido, 50)}</p>
-                    <div className="flex items-center justify-between pt-4 border-t border-stone-100">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow">
-                          <User className="w-4 h-4 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-stone-800 font-semibold">{noticia.autor_info?.nombre || 'Autor'}</p>
-                          <p className="text-xs text-stone-500">{noticia.programa || noticia.categoria}</p>
-                        </div>
+                    <p className="text-stone-600 text-sm leading-relaxed font-['Cormorant_Garamond'] line-clamp-3 mb-4 flex-1">{truncateWords(noticia.resumen || noticia.contenido, 50)}</p>
+                    <div className="flex items-center justify-between pt-3 border-t border-stone-100">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {noticia.autor_info?.avatar ? (
+                          <img
+                            src={noticia.autor_info.avatar.startsWith('http') ? noticia.autor_info.avatar : `${API_BASE}${noticia.autor_info.avatar}`}
+                            alt={noticia.autor_info?.nombre || 'Autor'}
+                            className="w-7 h-7 rounded-full object-cover shadow flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-7 h-7 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow flex-shrink-0">
+                            <User className="w-3.5 h-3.5 text-white" />
+                          </div>
+                        )}
+                        <p className="text-xs text-stone-700 font-semibold truncate">{noticia.autor_info?.nombre || 'Autor'}</p>
                       </div>
-                      <div className="flex items-center gap-3 text-stone-400 text-xs">
-                        <span className="flex items-center gap-1 hover:text-red-500 transition-colors"><Heart className="w-3 h-3" />{noticia.likes}</span>
-                        <span className="flex items-center gap-1 hover:text-blue-500 transition-colors"><MessageCircle className="w-3 h-3" />{noticia.comentarios}</span>
-                        <span className="flex items-center gap-1 hover:text-green-500 transition-colors"><Share2 className="w-3 h-3" />{noticia.compartidos}</span>
-                      </div>
+                      <button
+                        onClick={e => handleShare(e, noticia)}
+                        title="Copiar enlace"
+                        className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-colors flex-shrink-0"
+                      >
+                        {copiedId === noticia.id
+                          ? <><Check className="w-3 h-3" /> Copiado</>
+                          : <><Share2 className="w-3 h-3" /> Compartir</>}
+                      </button>
                     </div>
                   </div>
                 </article>
@@ -429,10 +410,6 @@ export default function AllNewsModern() {
                           {new Date(noticia.fecha).toLocaleDateString('es-ES')}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {noticia.tiempo_lectura ?? 0} min
-                        </span>
-                        <span className="flex items-center gap-1">
                           <Eye className="w-4 h-4" />
                           {noticia.vistas.toLocaleString()}
                         </span>
@@ -446,42 +423,32 @@ export default function AllNewsModern() {
                         {truncateWords(noticia.resumen || noticia.contenido, 50)}
                       </p>
 
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-2 mb-6">
-                        {noticia.tags.map((tag, index) => (
-                          <span key={index} className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-sm flex items-center gap-1">
-                            <Tag className="w-3 h-3" />
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-
                       {/* Footer */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
-                            <User className="w-5 h-5 text-white" />
-                          </div>
-                          <div>
-                            <p className="text-sm text-stone-800 font-semibold">{noticia.autor_info?.nombre || 'Autor'}</p>
-                            <p className="text-sm text-stone-500">{noticia.programa || noticia.categoria}</p>
-                          </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                          {noticia.autor_info?.avatar ? (
+                            <img
+                              src={noticia.autor_info.avatar.startsWith('http') ? noticia.autor_info.avatar : `${API_BASE}${noticia.autor_info.avatar}`}
+                              alt={noticia.autor_info?.nombre || 'Autor'}
+                              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <User className="w-5 h-5 text-white" />
+                            </div>
+                          )}
+                          <p className="text-sm text-stone-800 font-semibold truncate">{noticia.autor_info?.nombre || 'Autor'}</p>
                         </div>
-                        
-                        <div className="flex items-center gap-6 text-stone-400">
-                          <span className="flex items-center gap-2 hover:text-red-500 transition-colors">
-                            <Heart className="w-4 h-4" />
-                            {noticia.likes}
-                          </span>
-                          <span className="flex items-center gap-2 hover:text-blue-500 transition-colors">
-                            <MessageCircle className="w-4 h-4" />
-                            {noticia.comentarios}
-                          </span>
-                          <span className="flex items-center gap-2 hover:text-green-500 transition-colors">
-                            <Share2 className="w-4 h-4" />
-                            {noticia.compartidos}
-                          </span>
-                        </div>
+
+                        <button
+                          onClick={e => handleShare(e, noticia)}
+                          title="Copiar enlace"
+                          className="flex items-center gap-2 text-sm px-4 py-2 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-colors flex-shrink-0"
+                        >
+                          {copiedId === noticia.id
+                            ? <><Check className="w-4 h-4" /> Copiado</>
+                            : <><Share2 className="w-4 h-4" /> Compartir</>}
+                        </button>
                       </div>
                     </div>
                   </div>

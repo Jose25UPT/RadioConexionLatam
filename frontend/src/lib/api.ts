@@ -36,8 +36,15 @@ export async function fetchJson<T = any>(path: string, init?: RequestInit): Prom
   const url = `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
   const res = await fetch(url, { ...init, headers });
   if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`HTTP ${res.status} ${res.statusText}${text ? `: ${text}` : ''}`);
+    let detail = '';
+    try {
+      const body = await res.json();
+      detail = body?.detail || body?.message || JSON.stringify(body);
+    } catch {
+      detail = await res.text().catch(() => '');
+    }
+    throw new Error(`HTTP ${res.status}${detail ? `: ${detail}` : ` ${res.statusText}`}`);
   }
+  if (res.status === 204 || res.headers.get('content-length') === '0') return null as T;
   return res.json();
 }

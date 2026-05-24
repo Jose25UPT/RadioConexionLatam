@@ -1,6 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, X } from 'lucide-react';
 import ModernEditor from '../components/ModernEditor';
 import { NoticiaCrear } from '../types/Noticia';
 import { PANEL_BASE } from './secureRoute';
@@ -10,28 +9,24 @@ const AgregarNoticia: React.FC = () => {
 	const navigate = useNavigate();
 	const [formulario, setFormulario] = useState<NoticiaCrear>({
 		titulo: '', resumen: '', contenido: '', imagen: '', categoria: '', programa: '',
-		tags: [], destacada: false, autor_info: undefined,
-		audio_url: '', audio_titulo: '', permitir_comentarios: true, permitir_anonimos: true,
-		articulos_relacionados: []
+		destacada: false, autor_info: undefined, estado: 'publicado',
+		audio_url: '', audio_titulo: '', permitir_anonimos: true,
+		articulos_relacionados: [], destacado: '',
 	});
 	const [categorias, setCategorias] = useState<string[]>(['noticias', 'reviews', 'eventos', 'entrevistas']);
-	const [nuevoTag, setNuevoTag] = useState('');
 	const [subiendoImagen, setSubiendoImagen] = useState(false);
 	const [guardando, setGuardando] = useState(false);
 	const [errorMsg, setErrorMsg] = useState<string>('');
+	const guardadoExitosoRef = useRef(false);
 
-	// Autosave simple
+	// Limpiar draft al salir sin guardar
 	const DRAFT_KEY = 'draft_noticia_creacion_v2';
 	useEffect(() => {
-		const draft = localStorage.getItem(DRAFT_KEY);
-		if (draft) {
-			try { setFormulario(prev => ({ ...prev, ...JSON.parse(draft) })); } catch {}
-		}
+		localStorage.removeItem(DRAFT_KEY);
+		return () => {
+			if (!guardadoExitosoRef.current) localStorage.removeItem(DRAFT_KEY);
+		};
 	}, []);
-	useEffect(() => {
-		const t = setTimeout(() => localStorage.setItem(DRAFT_KEY, JSON.stringify(formulario)), 600);
-		return () => clearTimeout(t);
-	}, [formulario]);
 
 	// Cargar categorías desde API
 	useEffect(() => {
@@ -50,17 +45,9 @@ const AgregarNoticia: React.FC = () => {
 	const conteoPalabras = useMemo(() => textoPlano.trim().split(/\s+/).filter(Boolean).length, [textoPlano]);
 	const tiempoLecturaEstimado = useMemo(() => conteoPalabras ? Math.max(1, Math.ceil(conteoPalabras / 200)) : 0, [conteoPalabras]);
 
-	const limitarCaracteres = (texto: string, maxLen = 50) => texto.slice(0, maxLen);
-
 	const manejarCambio = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
 		const { name, value, type } = e.target;
 		const nuevoValor = type === 'checkbox' && e.target instanceof HTMLInputElement ? e.target.checked : value;
-		// Limitar resumen a 50 caracteres
-		if (name === 'resumen' && typeof nuevoValor === 'string') {
-			const limitado = limitarCaracteres(nuevoValor, 50);
-			setFormulario(prev => ({ ...prev, resumen: limitado }));
-			return;
-		}
 		setFormulario(prev => ({ ...prev, [name]: nuevoValor }));
 	};
 
@@ -75,7 +62,7 @@ const AgregarNoticia: React.FC = () => {
 				const response = await fetch(`${API_BASE}/api/uploads/imagen`, { method: 'POST', body: formData, headers });
 				if (!response.ok) throw new Error(await response.text());
 				const result = await response.json();
-				setFormulario(prev => ({ ...prev, imagen: `${API_BASE}${result.url}` }));
+				setFormulario(prev => ({ ...prev, imagen: result.url }));
 			} catch (e: any) {
 			setErrorMsg('Error subiendo imagen: ' + (e?.message || ''));
 		} finally { setSubiendoImagen(false); }
@@ -83,15 +70,6 @@ const AgregarNoticia: React.FC = () => {
 	const manejarCambioImagen = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0]; if (file) subirImagen(file);
 	};
-
-	const agregarTag = () => {
-		const val = nuevoTag.trim();
-		if (val && !formulario.tags.includes(val)) {
-			setFormulario(prev => ({ ...prev, tags: [...prev.tags, val] }));
-			setNuevoTag('');
-		}
-	};
-	const eliminarTag = (tag: string) => setFormulario(prev => ({ ...prev, tags: prev.tags.filter(t => t !== tag) }));
 
 	const validar = (): string | null => {
 		if (!formulario.titulo.trim()) return 'El título es obligatorio';
@@ -111,7 +89,7 @@ const AgregarNoticia: React.FC = () => {
 				const payload = { ...formulario, tiempo_lectura: tiempoLecturaEstimado };
 				await fetchJson('/api/noticias/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
 				alert('✅ Noticia guardada con éxito');
-				localStorage.removeItem(DRAFT_KEY);
+				guardadoExitosoRef.current = true;
 				navigate(PANEL_BASE);
 			} catch (err: any) {
 			setErrorMsg('Error al guardar: ' + (err?.message || ''));
@@ -166,7 +144,7 @@ const AgregarNoticia: React.FC = () => {
 						<label className="block text-sm font-medium text-stone-700">Imagen principal</label>
 						<div className="flex gap-3 items-start">
 							<div className="flex-1 space-y-2">
-								<input name="imagen" value={formulario.imagen} onChange={manejarCambio} placeholder="https://..."
+								<input name="imagen" value={formulario.imagen} onChange={manejarCambio} placeholder="/api/uploads/..."
 									className="w-full p-3 border border-stone-300 rounded-lg focus:ring-amber-500" />
 								<div className="flex items-center gap-3 text-xs">
 									<input type="file" accept="image/*" onChange={manejarCambioImagen} disabled={subiendoImagen} />
@@ -193,25 +171,12 @@ const AgregarNoticia: React.FC = () => {
 						</div>
 
 						<div className="space-y-2">
-							<label className="block text-sm font-medium text-stone-700">Tags</label>
-							<div className="flex gap-2">
-								<input value={nuevoTag} onChange={(e) => setNuevoTag(e.target.value)}
-									onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), agregarTag())}
-									placeholder="Añadir tag"
-									className="flex-1 p-3 border border-stone-300 rounded-lg focus:ring-amber-500" />
-								<button type="button" onClick={agregarTag}
-									className="px-3 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50">
-									<Plus className="w-4 h-4" />
-								</button>
-							</div>
-							<div className="flex flex-wrap gap-2">
-								{formulario.tags.map(tag => (
-									<span key={tag} className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm border border-amber-300">
-										{tag}
-										<X className="w-3 h-3 cursor-pointer" onClick={() => eliminarTag(tag)} />
-									</span>
-								))}
-							</div>
+							<label className="block text-sm font-medium text-stone-700">Estado</label>
+							<select name="estado" value={formulario.estado ?? 'publicado'} onChange={manejarCambio}
+								className="w-full p-3 border border-stone-300 rounded-lg focus:ring-amber-500">
+								<option value="publicado">Publicado</option>
+								<option value="borrador">Borrador</option>
+							</select>
 						</div>
 
 						<div className="flex items-center gap-3">
@@ -220,10 +185,12 @@ const AgregarNoticia: React.FC = () => {
 							<label className="text-sm text-stone-700">Marcar como destacada</label>
 						</div>
 
-						<div className="flex items-center gap-3">
-							<input name="permitir_comentarios" type="checkbox" checked={!!formulario.permitir_comentarios} onChange={manejarCambio}
-								className="w-4 h-4 text-amber-600 focus:ring-amber-500 border-stone-300 rounded" />
-							<label className="text-sm text-stone-700">Permitir comentarios</label>
+						<div className="space-y-2">
+							<label className="block text-sm font-medium text-stone-700">Cita destacada <span className="text-stone-400 font-normal">(opcional)</span></label>
+							<textarea name="destacado" value={formulario.destacado ?? ''} onChange={manejarCambio} rows={3}
+								placeholder="Frase memorable del artículo que aparecerá resaltada..."
+								className="w-full p-3 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-vertical text-sm" />
+							<p className="text-xs text-stone-400">Si no se completa, el bloque de cita no aparecerá en la noticia.</p>
 						</div>
 					</div>
 

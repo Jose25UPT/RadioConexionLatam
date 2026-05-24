@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import Optional
 from app.base_datos import SessionLocal
 from app import modelos, esquemas
@@ -100,6 +101,11 @@ def listar_usuarios(db: Session = Depends(get_db), admin: modelos.Usuario = Depe
             "rol": roles_map.get(u.rol_id, None),
             "rol_id": u.rol_id,
             "activo": u.activo,
+            "avatar": u.avatar or None,
+            "titulo": u.titulo or None,
+            "biografia": u.biografia or None,
+            "frase_personal": u.frase_personal or None,
+            "redes_sociales": u.redes_sociales or {},
         }
         for u in usuarios
     ]
@@ -162,6 +168,33 @@ def cambiar_rol_usuario(user_id: int, payload: dict, db: Session = Depends(get_d
     usuario.rol_id = rol.id
     db.commit()
     return {"ok": True}
+
+@router.patch("/users/{user_id}/nombre", response_model=dict)
+def actualizar_nombre_usuario(user_id: int, payload: dict, db: Session = Depends(get_db), admin: modelos.Usuario = Depends(require_role(["admin"]))):
+    usuario = db.query(modelos.Usuario).filter(modelos.Usuario.id == user_id).first()
+    if not usuario:
+        raise HTTPException(404, detail="Usuario no encontrado")
+    nuevo = (payload.get("nombre_usuario") or "").strip()
+    if not nuevo:
+        raise HTTPException(400, detail="Nombre requerido")
+    duplicado = db.query(modelos.Usuario).filter(
+        modelos.Usuario.nombre_usuario == nuevo,
+        modelos.Usuario.id != user_id
+    ).first()
+    if duplicado:
+        raise HTTPException(400, detail="Nombre de usuario ya existe")
+    usuario.nombre_usuario = nuevo
+    db.commit()
+    return {"ok": True, "nombre_usuario": nuevo}
+
+@router.patch("/users/{user_id}/activo", response_model=dict)
+def set_activo_usuario(user_id: int, payload: dict, db: Session = Depends(get_db), admin: modelos.Usuario = Depends(require_role(["admin"]))):
+    usuario = db.query(modelos.Usuario).filter(modelos.Usuario.id == user_id).first()
+    if not usuario:
+        raise HTTPException(404, detail="Usuario no encontrado")
+    usuario.activo = bool(payload.get("activo", True))
+    db.commit()
+    return {"activo": usuario.activo}
 
 @router.patch("/users/{user_id}/toggle", response_model=dict)
 def activar_desactivar_usuario(user_id: int, db: Session = Depends(get_db), admin: modelos.Usuario = Depends(require_role(["admin"]))):
@@ -237,3 +270,64 @@ def actualizar_perfil_usuario(user_id: int, payload: esquemas.UserProfileUpdate,
         usuario.anime_favoritos = data['anime_favoritos']
     db.commit()
     return {"ok": True}
+
+
+# ==========================
+# Métricas
+# ==========================
+
+@router.get("/metricas", response_model=dict)
+def obtener_metricas(db: Session = Depends(get_db), admin: modelos.Usuario = Depends(require_role(["admin"]))):
+    total_noticias = db.query(func.count(modelos.Noticia.id)).scalar() or 0
+    total_vistas = db.query(func.sum(modelos.Noticia.visitas)).scalar() or 0
+
+    cats = db.query(
+        modelos.Categoria.nombre,
+        func.count(modelos.Noticia.id).label("articulos"),
+        func.coalesce(func.sum(modelos.Noticia.visitas), 0).label("vistas"),
+    ).outerjoin(modelos.Noticia, modelos.Noticia.categoria_id == modelos.Categoria.id) \
+     .group_by(modelos.Categoria.nombre) \
+     .order_by(func.sum(modelos.Noticia.visitas).desc().nullslast()) \
+     .all()
+
+    categorias = [
+        {"categoria": c.nombre, "articulos": c.articulos, "vistas": int(c.vistas)}
+        for c in cats
+    ]
+
+    top_noticias = db.query(
+        modelos.Noticia.id,
+        modelos.Noticia.titulo,
+        modelos.Noticia.slug,
+        modelos.Noticia.visitas,
+        modelos.Categoria.nombre.label("categoria"),
+    ).outerjoin(modelos.Categoria, modelos.Categoria.id == modelos.Noticia.categoria_id) \
+     .order_by(modelos.Noticia.visitas.desc()) \
+     .limit(10).all()
+
+    top = [
+        {"id": n.id, "titulo": n.titulo, "slug": n.slug, "vistas": n.visitas or 0, "categoria": n.categoria}
+        for n in top_noticias
+    ]
+
+    editores = db.query(
+        modelos.Usuario.nombre_usuario,
+        func.count(modelos.Noticia.id).label("articulos"),
+        func.coalesce(func.sum(modelos.Noticia.visitas), 0).label("vistas"),
+    ).outerjoin(modelos.Noticia, modelos.Noticia.autor_id == modelos.Usuario.id) \
+     .group_by(modelos.Usuario.nombre_usuario) \
+     .order_by(func.count(modelos.Noticia.id).desc()) \
+     .limit(10).all()
+
+    top_editores = [
+        {"editor": e.nombre_usuario, "articulos": e.articulos, "vistas": int(e.vistas)}
+        for e in editores
+    ]
+
+    return {
+        "total_noticias": total_noticias,
+        "total_vistas": int(total_vistas),
+        "por_categoria": categorias,
+        "top_noticias": top,
+        "top_editores": top_editores,
+    }

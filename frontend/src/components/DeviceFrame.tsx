@@ -32,7 +32,7 @@ export default function DeviceFrame({ children, gradient = 'blue' }: DeviceFrame
           {/* Área de contenido scrollable dentro de la pantalla */}
           <div className="relative h-full pt-10 pb-6 overflow-hidden">
             <div className="absolute inset-x-0 bottom-2 mx-auto h-1.5 w-28 rounded-full bg-black/10"></div>
-            <div className="relative h-full overflow-auto px-3">{children}</div>
+            <div className="relative h-full overflow-auto px-1">{children}</div>
           </div>
         </div>
       </div>

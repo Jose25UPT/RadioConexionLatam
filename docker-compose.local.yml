@@ -1,0 +1,57 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: radio_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${FC_DB_PASSWORD}
+      MYSQL_DATABASE: ${FC_DB_NAME}
+      MYSQL_USER: ${FC_DB_USER}
+      MYSQL_PASSWORD: ${FC_DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - radio_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  fans-choice:
+    ports:
+      - "8080:80"
+    environment:
+      FC_DB_HOST: mysql
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: radio_frontend
+    restart: unless-stopped
+    environment:
+      BACKEND_URL: http://backend:8000
+      VITE_SPOTIFY_EMBED: ${VITE_SPOTIFY_EMBED:-}
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - radio_net
+
+  backend:
+    volumes:
+      - ./backend/backend_fastapi/app:/app/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      CORS_ALLOW_ORIGINS: "http://localhost:5173"
+
+volumes:
+  mysql_data:

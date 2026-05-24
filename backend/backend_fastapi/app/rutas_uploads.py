@@ -1,10 +1,13 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, status
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 import shutil
 import os
+import io
 from pathlib import Path
 import uuid
 from PIL import Image
+from app.base_datos import SessionLocal
+from app.modelos import Usuario, Noticia
 
 router = APIRouter(
     prefix="/api/uploads",
@@ -22,7 +25,8 @@ IMAGES_DIR.mkdir(exist_ok=True)
 
 # Tipos de archivo permitidos
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
-MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+MAX_FILE_SIZE = 5 * 1024 * 1024       # 5 MB — imágenes de noticias
+MAX_AVATAR_SIZE = 2 * 1024 * 1024     # 2 MB — fotos de perfil
 
 def validar_imagen(file: UploadFile) -> bool:
     """Valida que el archivo sea una imagen válida"""
@@ -54,7 +58,7 @@ def redimensionar_imagen(input_path: Path, output_path: Path, max_width: int = 1
         )
 
 @router.post("/imagen", response_model=dict)
-async def subir_imagen(file: UploadFile = File(...)):
+async def subir_imagen(file: UploadFile = File(...), usuario_id: int | None = None, noticia_id: int | None = None):
     """
     Sube una imagen para usar en noticias o perfiles.
     """
@@ -70,10 +74,12 @@ async def subir_imagen(file: UploadFile = File(...)):
     file_size = file.file.tell()
     file.file.seek(0)  # Volver al inicio
     
-    if file_size > MAX_FILE_SIZE:
+    limit = MAX_AVATAR_SIZE if usuario_id is not None else MAX_FILE_SIZE
+    limit_label = "2MB" if usuario_id is not None else "5MB"
+    if file_size > limit:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="El archivo es demasiado grande. Máximo 5MB."
+            detail=f"El archivo es demasiado grande. Máximo {limit_label}."
         )
     
     # Generar nombre único
@@ -96,15 +102,52 @@ async def subir_imagen(file: UploadFile = File(...)):
         # Eliminar archivo temporal
         temp_file_path.unlink()
         
-        # Generar URL de acceso
+        # Leer bytes procesados
+        with final_file_path.open("rb") as f:
+            image_bytes = f.read()
+
         image_url = f"/api/uploads/images/{unique_filename}"
-        
+
+        # Si se pasó usuario_id o noticia_id, almacenar en la BD como blob
+        if usuario_id is not None or noticia_id is not None:
+            db = SessionLocal()
+            try:
+                if usuario_id is not None:
+                    user = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+                    if not user:
+                        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")
+                    user.avatar_blob = image_bytes
+                    # También actualizar campo avatar con la ruta blob
+                    user.avatar = f"/api/uploads/blob/usuario/{usuario_id}"
+                    db.add(user)
+                    db.commit()
+                    image_url = user.avatar
+
+                if noticia_id is not None:
+                    noticia = db.query(Noticia).filter(Noticia.id == noticia_id).first()
+                    if not noticia:
+                        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Noticia no encontrada")
+                    noticia.imagen_blob = image_bytes
+                    noticia.imagen_principal = f"/api/uploads/blob/noticia/{noticia_id}"
+                    db.add(noticia)
+                    db.commit()
+                    image_url = noticia.imagen_principal
+
+            finally:
+                db.close()
+
+            # Borrar archivo en disco si ya se guardó en BD
+            try:
+                final_file_path.unlink()
+            except Exception:
+                pass
+
         return {
             "success": True,
             "url": image_url,
             "filename": unique_filename,
             "original_name": file.filename,
-            "size": final_file_path.stat().st_size
+            "size": len(image_bytes)
         }
         
     except Exception as e:
@@ -133,6 +176,30 @@ async def obtener_imagen(filename: str):
         )
     
     return FileResponse(file_path)
+
+
+@router.get("/blob/usuario/{usuario_id}")
+async def obtener_avatar_blob(usuario_id: int):
+    db = SessionLocal()
+    try:
+        user = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+        if not user or not user.avatar_blob:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Avatar no encontrado")
+        return StreamingResponse(io.BytesIO(user.avatar_blob), media_type="image/jpeg")
+    finally:
+        db.close()
+
+
+@router.get("/blob/noticia/{noticia_id}")
+async def obtener_imagen_blob(noticia_id: int):
+    db = SessionLocal()
+    try:
+        noticia = db.query(Noticia).filter(Noticia.id == noticia_id).first()
+        if not noticia or not noticia.imagen_blob:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Imagen de noticia no encontrada")
+        return StreamingResponse(io.BytesIO(noticia.imagen_blob), media_type="image/jpeg")
+    finally:
+        db.close()
 
 @router.delete("/images/{filename}")
 async def eliminar_imagen(filename: str):

@@ -1,4 +1,5 @@
 import { Menu, X } from 'lucide-react';
+import { useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { PANEL_LOGIN, PANEL_BASE } from '../secure_panel_rva_gestor_2025/secureRoute';
 import { getToken, clearAuth } from '../secure_panel_rva_gestor_2025/auth';
@@ -15,13 +16,25 @@ export default function Header({ isMenuOpen, setIsMenuOpen }: HeaderProps) {
   const isAuth = !!getToken();
   const isAdmin = (localStorage.getItem('user_role') || '').toUpperCase() === 'ADMIN';
   const handleLogout = () => { clearAuth(); navigate('/'); };
+
+  const clickCount = useRef(0);
+  const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleLogoClick = () => {
+    clickCount.current += 1;
+    if (clickTimer.current) clearTimeout(clickTimer.current);
+    clickTimer.current = setTimeout(() => { clickCount.current = 0; }, 1500);
+    if (clickCount.current >= 5) {
+      clickCount.current = 0;
+      if (clickTimer.current) clearTimeout(clickTimer.current);
+      navigate(PANEL_LOGIN);
+    }
+  };
   
   const navItems = [
     { name: 'Inicio', href: isHomePage ? '#inicio' : '/', type: 'link' },
-    { name: 'Programas', href: isHomePage ? '#programas' : '/#programas', type: isHomePage ? 'anchor' : 'link' },
     { name: 'Noticias', href: '/noticias', type: 'link' },
+    { name: 'Notas', href: '/notas', type: 'link' },
     { name: 'Redes Sociales', href: isHomePage ? '#redes' : '/#redes', type: isHomePage ? 'anchor' : 'link' },
-    { name: 'Equipo', href: isHomePage ? '#equipo' : '/#equipo', type: isHomePage ? 'anchor' : 'link' }
   ];
 
   return (
@@ -29,22 +42,22 @@ export default function Header({ isMenuOpen, setIsMenuOpen }: HeaderProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center py-4">
           {/* Logo - Far Left */}
-          <Link to="/" className="flex items-center space-x-3 flex-shrink-0">
-            <div className="relative">
-              <img 
-                src="/logo.jpg" 
-                alt="Radio Conexión Latam" 
+          <div className="flex items-center space-x-3 flex-shrink-0">
+            <div className="relative cursor-pointer" onClick={handleLogoClick}>
+              <img
+                src="/logo.jpg"
+                alt="Radio Conexión Latam"
                 className="h-14 w-14 rounded-xl shadow-lg border-2 border-white/20"
               />
               <div className="absolute -top-1 -right-1 w-4 h-4 bg-pink-500 rounded-full animate-pulse"></div>
             </div>
-            <div>
+            <Link to="/">
               <h1 className="text-xl md:text-2xl font-bold text-white tracking-tight">
                 Radio Conexión
                 <span className="block text-pink-300 text-sm md:text-base">LATAM</span>
               </h1>
-            </div>
-          </Link>
+            </Link>
+          </div>
 
           {/* Spacer to push navigation to the right */}
           <div className="flex-1"></div>
@@ -90,12 +103,7 @@ export default function Header({ isMenuOpen, setIsMenuOpen }: HeaderProps) {
                   <span>Salir</span>
                 </button>
               </>
-            ) : (
-              <Link to={PANEL_LOGIN} className="ml-6 flex items-center gap-2 px-3 py-2 rounded-lg bg-pink-500 hover:bg-pink-600 text-white font-semibold shadow-lg transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12H3m0 0l4-4m-4 4l4 4m13-4a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <span>Login</span>
-              </Link>
-            )}
+            ) : null}
           </nav>
 
           {/* Mobile menu button - Far Right */}
@@ -150,12 +158,7 @@ export default function Header({ isMenuOpen, setIsMenuOpen }: HeaderProps) {
                     <span>Salir</span>
                   </button>
                 </>
-              ) : (
-                <Link to={PANEL_LOGIN} className="flex items-center gap-2 px-4 py-3 rounded-lg bg-pink-500 hover:bg-pink-600 text-white font-semibold shadow-lg transition-colors" onClick={() => setIsMenuOpen(false)}>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12H3m0 0l4-4m-4 4l4 4m13-4a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  <span>Login</span>
-                </Link>
-              )}
+              ) : null}
             </nav>
           </div>
         )}

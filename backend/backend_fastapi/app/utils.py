@@ -32,22 +32,3 @@ def generar_slug(titulo: str) -> str:
     slug = slug.strip('-')
     
     return slug
-
-def tags_a_json(tags: List[str]) -> str:
-    """
-    Convierte una lista de tags a JSON string para almacenar en DB.
-    """
-    if not tags:
-        return "[]"
-    return json.dumps(tags, ensure_ascii=False)
-
-def json_a_tags(tags_json: str) -> List[str]:
-    """
-    Convierte JSON string de tags a lista de Python.
-    """
-    if not tags_json:
-        return []
-    try:
-        return json.loads(tags_json)
-    except (json.JSONDecodeError, TypeError):
-        return []

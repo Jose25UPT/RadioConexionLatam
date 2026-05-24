@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, field_validator
 from datetime import date, datetime
 from typing import Optional, List, Dict, Any
 
@@ -26,7 +26,6 @@ class NoticiaBase(BaseModel):
     imagen: Optional[str] = None
     categoria: Optional[str] = None
     programa: Optional[str] = None
-    tags: Optional[List[str]] = []
     vistas: Optional[int] = 0
     likes: Optional[int] = 0
     comentarios: Optional[int] = 0
@@ -46,46 +45,50 @@ class NoticiaBase(BaseModel):
     
     # Artículos relacionados
     articulos_relacionados: Optional[List[int]] = []
+    destacado: Optional[str] = None
 
 class NoticiaCrear(BaseModel):
-    titulo: str
-    resumen: Optional[str] = None
-    contenido: str
+    titulo: str = Field(..., max_length=300)
+    resumen: Optional[str] = Field(None, max_length=500)
+    contenido: str = Field(..., max_length=200_000)
     fecha: Optional[date] = None
-    imagen: Optional[str] = None
-    categoria: Optional[str] = None
-    programa: Optional[str] = None
-    tags: Optional[List[str]] = []
+    imagen: Optional[str] = Field(None, max_length=2000)
+    categoria: Optional[str] = Field(None, max_length=100)
+    programa: Optional[str] = Field(None, max_length=200)
     destacada: Optional[bool] = False
     autor_info: Optional[AutorInfo] = None
-    audio_url: Optional[str] = None
-    audio_titulo: Optional[str] = None
+    audio_url: Optional[str] = Field(None, max_length=2000)
+    audio_titulo: Optional[str] = Field(None, max_length=200)
     permitir_comentarios: Optional[bool] = True
     permitir_anonimos: Optional[bool] = True
     articulos_relacionados: Optional[List[int]] = []
+    estado: Optional[str] = None
+    destacado: Optional[str] = Field(None, max_length=500)
 
 class NoticiaActualizar(BaseModel):
-    titulo: Optional[str] = None
-    resumen: Optional[str] = None
-    contenido: Optional[str] = None
+    titulo: Optional[str] = Field(None, max_length=300)
+    resumen: Optional[str] = Field(None, max_length=500)
+    contenido: Optional[str] = Field(None, max_length=200_000)
     fecha: Optional[date] = None
-    imagen: Optional[str] = None
-    categoria: Optional[str] = None
-    programa: Optional[str] = None
-    tags: Optional[List[str]] = None
+    imagen: Optional[str] = Field(None, max_length=2000)
+    categoria: Optional[str] = Field(None, max_length=100)
+    programa: Optional[str] = Field(None, max_length=200)
     destacada: Optional[bool] = None
     autor_id: Optional[int] = None
     autor_info: Optional[AutorInfo] = None
-    audio_url: Optional[str] = None
-    audio_titulo: Optional[str] = None
+    audio_url: Optional[str] = Field(None, max_length=2000)
+    audio_titulo: Optional[str] = Field(None, max_length=200)
     permitir_comentarios: Optional[bool] = None
     permitir_anonimos: Optional[bool] = None
     articulos_relacionados: Optional[List[int]] = None
+    estado: Optional[str] = None
+    destacado: Optional[str] = Field(None, max_length=500)
 
 class NoticiaRespuesta(NoticiaBase):
     id: int
     slug: str
     autor_id: Optional[int] = None
+    estado: Optional[str] = None
     fecha_creacion: Optional[datetime] = None
     fecha_actualizacion: Optional[datetime] = None
     last_edited_by: Optional[str] = None
@@ -187,12 +190,49 @@ class TokenData(BaseModel):
 # ==========================
 
 class UserProfileUpdate(BaseModel):
-    nombre_completo: str | None = None
-    avatar: str | None = None
-    titulo: str | None = None
-    bio: str | None = None
-    frase: str | None = None
+    nombre_completo: str | None = Field(None, max_length=200)
+    avatar: str | None = Field(None, max_length=2000)
+    titulo: str | None = Field(None, max_length=150)
+    bio: str | None = Field(None, max_length=1000)
+    frase: str | None = Field(None, max_length=300)
     redes_sociales: Dict[str, str] | None = None
     especialidades: List[str] | None = None
     logros: List[str] | None = None
     anime_favoritos: List[str] | None = None
+
+    @field_validator('redes_sociales')
+    @classmethod
+    def validar_redes(cls, v: Dict[str, str] | None) -> Dict[str, str] | None:
+        if v is None:
+            return v
+        if len(v) > 10:
+            raise ValueError('Máximo 10 redes sociales')
+        for key, val in v.items():
+            if len(key) > 30:
+                raise ValueError(f'Nombre de red muy largo: {key}')
+            if len(val) > 500:
+                raise ValueError(f'URL de red social muy larga: {key}')
+        return v
+
+
+# ==========================
+# Notas (tweets de editores)
+# ==========================
+
+class NotaCrear(BaseModel):
+    contenido: str = Field(..., max_length=2000)
+
+class NotaActualizar(BaseModel):
+    contenido: Optional[str] = Field(None, max_length=2000)
+
+class NotaRespuesta(BaseModel):
+    id: int
+    contenido: str
+    activa: bool
+    autor_nombre: Optional[str] = None
+    autor_avatar: Optional[str] = None
+    autor_id: Optional[int] = None
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True

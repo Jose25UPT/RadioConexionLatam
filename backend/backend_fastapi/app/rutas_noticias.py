@@ -5,18 +5,62 @@ from sqlalchemy import or_, func
 from datetime import date
 from app.base_datos import SessionLocal, engine, Base
 from app import modelos, esquemas
-from app.utils import generar_slug, tags_a_json, json_a_tags
+from app.utils import generar_slug
 from app.auth import decodificar_token
 import math
 from app.rutas_auth import get_current_user
 import json
 from app.rutas_auth import require_role
 from app import modelos as modelos_module
+import nh3
+
+# Tags y atributos que CKEditor genera legítimamente
+_HTML_TAGS = {
+    'p', 'br', 'hr', 'strong', 'em', 'u', 's', 'b', 'i', 'mark',
+    'h2', 'h3', 'h4', 'h5', 'h6',
+    'ul', 'ol', 'li', 'blockquote', 'pre', 'code',
+    'a', 'img',
+    'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption',
+    'figure', 'figcaption', 'oembed',
+    'span', 'div',
+}
+_HTML_ATTRS: dict[str, set[str]] = {
+    'a':        {'href', 'title', 'target'},
+    'img':      {'src', 'alt', 'width', 'height', 'class'},
+    'figure':   {'class'},
+    'figcaption': {'class'},
+    'div':      {'class'},
+    'span':     {'class'},
+    'p':        {'class'},
+    'h2':       {'class'}, 'h3': {'class'}, 'h4': {'class'},
+    'ul':       {'class'}, 'ol': {'class'}, 'li': {'class'},
+    'blockquote': {'class'},
+    'pre':      {'class'}, 'code': {'class'},
+    'table':    {'class'},
+    'td':       {'colspan', 'rowspan', 'class'},
+    'th':       {'colspan', 'rowspan', 'class'},
+    'oembed':   {'url'},
+}
+
+def sanitizar_html(html: str | None) -> str | None:
+    if not html:
+        return html
+    return nh3.clean(
+        html,
+        tags=_HTML_TAGS,
+        attributes=_HTML_ATTRS,
+        url_schemes={'https', 'http'},
+        strip_comments=True,
+        link_rel='noopener noreferrer',
+    )
 
 oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
-# Crear las tablas en la base de datos (si aún no existen)
-Base.metadata.create_all(bind=engine)
+# Asegurar que todas las tablas existen (incluye Nota y demás modelos nuevos)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as _e:
+    print(f"[WARNING] create_all: {_e}")
 
 router = APIRouter(
     prefix="/api/noticias",
@@ -45,6 +89,7 @@ def listar_noticias(
     categoria: str = None,
     destacada: bool = None,
     buscar: str = None,
+    autor_id: int = None,
     limite: int = 20,
     offset: int = 0,
     db: Session = Depends(get_db)
@@ -53,6 +98,19 @@ def listar_noticias(
     Devuelve todas las noticias con filtros opcionales.
     """
     query = db.query(modelos.Noticia)
+    # Mostrar solo noticias con estado 'publicado' en el endpoint público.
+    # Interpretación: si la noticia no tiene estado (estado_id is NULL) la tratamos como publicada
+    try:
+        query = query.join(modelos.EstadoNoticia, modelos.EstadoNoticia.id == modelos.Noticia.estado_id, isouter=True)
+        query = query.filter(
+            or_(
+                func.lower(modelos.EstadoNoticia.nombre) == 'publicado',
+                modelos.Noticia.estado_id == None
+            )
+        )
+    except Exception:
+        # Si hay algún problema con la tabla de estados, no cortar la lista (compatibilidad)
+        pass
     
     # Filtrar por categoría
     if categoria and categoria.lower() != "todas":
@@ -64,6 +122,10 @@ def listar_noticias(
     # Filtrar por destacada
     if destacada is not None:
         query = query.filter(modelos.Noticia.destacada == destacada)
+
+    # Filtrar por autor
+    if autor_id is not None:
+        query = query.filter(modelos.Noticia.autor_id == autor_id)
     
     # Búsqueda en título y contenido
     if buscar:
@@ -83,12 +145,11 @@ def listar_noticias(
         .all()
     )
     
-    # Convertir meta_keywords a tags de lista y reconstruir autor_info desde usuario
     for noticia in noticias:
-        noticia.tags = [t.strip() for t in (noticia.meta_keywords or '').split(',') if t.strip()]
-        # Mapeo de campos hacia el esquema esperado por el frontend
         noticia.imagen = noticia.imagen_principal
         noticia.fecha = noticia.fecha_publicacion
+        noticia.vistas = noticia.visitas or 0
+        noticia.compartidos = noticia.shares or 0
         # Categoría por nombre
         if noticia.categoria_id:
             cat = db.query(modelos.Categoria).get(noticia.categoria_id)
@@ -113,6 +174,12 @@ def listar_noticias(
                     redes_sociales=u.redes_sociales or {},
                     frase=u.frase_personal,
                 )
+        # Normalizar estado textual: si no hay estado explícito, considerarlo 'publicado' para el endpoint público
+        if noticia.estado_id:
+            est = db.get(modelos.EstadoNoticia, noticia.estado_id)
+            noticia.estado = est.nombre if est else None
+        else:
+            noticia.estado = 'publicado'
     
     return noticias
 
@@ -129,26 +196,53 @@ def listar_categorias(db: Session = Depends(get_db)):
     )
     return [fila[0] for fila in filas if fila and fila[0]]
 
+@router.post("/categorias/", status_code=201)
+def crear_categoria(nombre: str, db: Session = Depends(get_db), _u: modelos.Usuario = Depends(require_role(["admin", "editor"]))):
+    nombre = nombre.strip()
+    if not nombre:
+        raise HTTPException(status_code=400, detail="El nombre no puede estar vacío")
+    cat_slug = generar_slug(nombre)
+    existente = db.query(modelos.Categoria).filter(modelos.Categoria.slug == cat_slug).first()
+    if existente:
+        if not existente.activa:
+            existente.activa = True
+            db.commit()
+            return {"nombre": existente.nombre}
+        raise HTTPException(status_code=409, detail="La categoría ya existe")
+    nueva = modelos.Categoria(nombre=nombre, slug=cat_slug, activa=True)
+    db.add(nueva)
+    db.commit()
+    db.refresh(nueva)
+    return {"nombre": nueva.nombre}
+
+@router.delete("/categorias/", status_code=204)
+def eliminar_categoria(nombre: str, db: Session = Depends(get_db), _u: modelos.Usuario = Depends(require_role(["admin", "editor"]))):
+    nombre_lower = nombre.strip().lower()
+    cat = db.query(modelos.Categoria).filter(
+        func.lower(modelos.Categoria.nombre) == nombre_lower
+    ).first()
+    if not cat:
+        raise HTTPException(status_code=404, detail="Categoría no encontrada")
+    en_uso = db.query(modelos.Noticia).filter(modelos.Noticia.categoria_id == cat.id).first()
+    if en_uso:
+        raise HTTPException(status_code=409, detail="No se puede eliminar: hay noticias usando esta categoría")
+    db.delete(cat)
+    db.commit()
+
 @router.get("/tags/", response_model=list[str])
 def listar_tags(db: Session = Depends(get_db)):
     """
-    Devuelve la lista de tags únicos (derivados de meta_keywords).
+    Tags fueron removidos del modelo; retornar lista vacía para compatibilidad.
     """
-    filas = (
-        db.query(modelos.Noticia.meta_keywords)
-        .filter(modelos.Noticia.meta_keywords != None)
-        .all()
-    )
-    tags_set = set()
-    for (mk,) in filas:
-        if not mk:
-            continue
-        for t in mk.split(','):
-            tt = t.strip()
-            if tt:
-                tags_set.add(tt)
-    # Ordenar alfabéticamente ignorando mayúsculas/minúsculas
-    return sorted(tags_set, key=lambda s: s.lower())
+    return []
+
+@router.post("/{noticia_id}/vista", status_code=200)
+def registrar_vista(noticia_id: int, db: Session = Depends(get_db)):
+    noticia = db.query(modelos.Noticia).filter(modelos.Noticia.id == noticia_id).first()
+    if noticia:
+        noticia.visitas = (noticia.visitas or 0) + 1
+        db.commit()
+    return {"ok": True}
 
 @router.get("/slug/{slug}", response_model=esquemas.NoticiaRespuesta)
 def obtener_noticia_por_slug(slug: str, db: Session = Depends(get_db)):
@@ -161,13 +255,21 @@ def obtener_noticia_por_slug(slug: str, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Noticia no encontrada"
         )
+    # Solo permitir ver noticias publicadas en este endpoint público
+    try:
+        if noticia.estado_id:
+            est = db.get(modelos.EstadoNoticia, noticia.estado_id)
+            if est and str(est.nombre).strip().lower() != 'publicado':
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Noticia no encontrada")
+    except HTTPException:
+        raise
+    except Exception:
+        # Si hay error comprobando estado, continuar (compatibilidad)
+        pass
     
-    # Incrementar vistas
-    noticia.visitas = (noticia.visitas or 0) + 1
-    db.commit()
+    # Las vistas se registran desde el frontend tras 40 segundos de lectura real
     
-    # Mapear respuesta
-    noticia.tags = [t.strip() for t in (noticia.meta_keywords or '').split(',') if t.strip()]
+    # Mapear respuesta (tags removed)
     noticia.imagen = noticia.imagen_principal
     noticia.fecha = noticia.fecha_publicacion
     noticia.vistas = noticia.visitas or 0
@@ -215,9 +317,18 @@ def obtener_noticia(noticia_id: int, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Noticia no encontrada"
         )
+    # Endpoint público por ID: sólo publicar si estado == 'publicado'
+    try:
+        if noticia.estado_id:
+            est = db.get(modelos.EstadoNoticia, noticia.estado_id)
+            if est and str(est.nombre).strip().lower() != 'publicado':
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Noticia no encontrada")
+    except HTTPException:
+        raise
+    except Exception:
+        pass
     
-    # Mapear respuesta
-    noticia.tags = [t.strip() for t in (noticia.meta_keywords or '').split(',') if t.strip()]
+    # Mapear respuesta (tags removed)
     noticia.imagen = noticia.imagen_principal
     noticia.fecha = noticia.fecha_publicacion
     noticia.vistas = noticia.visitas or 0
@@ -312,13 +423,12 @@ def crear_noticia(
     except Exception:
         estado_id = None
 
-    # Preparar datos alineados al modelo
     datos_noticia = {
         'titulo': noticia.titulo,
         'slug': slug,
-    # Limitar resumen a 50 caracteres (letras) para evitar overlays en frontend
-    'resumen': _limitar_caracteres(noticia.resumen, 50),
-        'contenido': noticia.contenido,
+        # Limitar resumen a 50 caracteres (letras) para evitar overlays en frontend
+        'resumen': _limitar_caracteres(noticia.resumen, 50),
+        'contenido': sanitizar_html(noticia.contenido),
         'imagen_principal': noticia.imagen,
         'audio_url': noticia.audio_url,
         'categoria_id': categoria_id,
@@ -326,8 +436,27 @@ def crear_noticia(
         'destacada': bool(noticia.destacada),
         'permite_comentarios': bool(noticia.permitir_comentarios),
         'fecha_publicacion': noticia.fecha or date.today(),
-        'meta_keywords': ','.join(noticia.tags or []) if noticia.tags else None,
+        'destacado': getattr(noticia, 'destacado', None),
     }
+    # If the client provided an 'estado' string, attempt to resolve it to estado_id
+    if getattr(noticia, 'estado', None):
+        try:
+            est_name = str(noticia.estado).strip().lower()
+            est = db.query(modelos.EstadoNoticia).filter(func.lower(modelos.EstadoNoticia.nombre) == est_name).first()
+            if not est:
+                est = modelos.EstadoNoticia(nombre=noticia.estado, descripcion=noticia.estado, activo=True)
+                db.add(est)
+                db.commit()
+                db.refresh(est)
+            datos_noticia['estado_id'] = est.id
+        except Exception:
+            pass
+    # Validar que la imagen no sea una URL externa (solo rutas relativas internas o blob)
+    img_val = datos_noticia.get('imagen_principal')
+    if img_val:
+        if isinstance(img_val, str) and img_val.strip().startswith('http'):
+            # Rechazar URLs absolutas para forzar uso de subida de archivos
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Solo se aceptan imágenes subidas; por favor use el botón de subir imagen.")
     if user:
         datos_noticia['autor_id'] = user.id
 
@@ -341,9 +470,13 @@ def crear_noticia(
     db.refresh(nueva)
     
     # Mapear respuesta esperada por frontend
-    nueva.tags = [t.strip() for t in (nueva.meta_keywords or '').split(',') if t.strip()]
     nueva.imagen = nueva.imagen_principal
     nueva.fecha = nueva.fecha_publicacion
+    nueva.destacado = nueva.destacado
+    # map estado name
+    if nueva.estado_id:
+        est = db.get(modelos.EstadoNoticia, nueva.estado_id)
+        nueva.estado = est.nombre if est else None
     if nueva.categoria_id:
         cat = db.get(modelos.Categoria, nueva.categoria_id)
         nueva.categoria = cat.nombre if cat else None
@@ -417,6 +550,9 @@ def actualizar_noticia(noticia_id: int, datos: esquemas.NoticiaActualizar, db: S
         datos_actualizacion['fecha_publicacion'] = datos_actualizacion.pop('fecha')
     if 'permitir_comentarios' in datos_actualizacion:
         datos_actualizacion['permite_comentarios'] = bool(datos_actualizacion.pop('permitir_comentarios'))
+    if 'destacado' in datos_actualizacion:
+        # textual destacado
+        datos_actualizacion['destacado'] = datos_actualizacion.get('destacado')
     if 'categoria' in datos_actualizacion and datos_actualizacion['categoria']:
         cat_nombre = str(datos_actualizacion.pop('categoria')).strip()
         cat_slug = generar_slug(cat_nombre)
@@ -454,15 +590,35 @@ def actualizar_noticia(noticia_id: int, datos: esquemas.NoticiaActualizar, db: S
             datos_actualizacion['slug'] = nuevo_slug
     
     # Actualizar tags si se proporcionan
-    if datos.tags is not None:
-        datos_actualizacion['meta_keywords'] = ','.join(datos.tags or [])
+    # Tags removed: no longer accepted
+
+    # Mapear estado si se proporciona como string
+    if 'estado' in datos_actualizacion and datos_actualizacion.get('estado') is not None:
+        try:
+            est_name = str(datos_actualizacion.pop('estado')).strip().lower()
+            est = db.query(modelos.EstadoNoticia).filter(func.lower(modelos.EstadoNoticia.nombre) == est_name).first()
+            if not est:
+                est = modelos.EstadoNoticia(nombre=est_name, descripcion=est_name, activo=True)
+                db.add(est)
+                db.commit()
+                db.refresh(est)
+            datos_actualizacion['estado_id'] = est.id
+        except Exception:
+            pass
 
     # Se ignora autor_info en actualización (se deriva del autor_id)
 
-    # Recalcular tiempo_lectura si cambia el contenido
+    # Sanitizar y recalcular tiempo_lectura si cambia el contenido
     if 'contenido' in datos_actualizacion:
+        datos_actualizacion['contenido'] = sanitizar_html(datos_actualizacion['contenido'])
         palabras = len((datos_actualizacion['contenido'] or '').split())
         datos_actualizacion['tiempo_lectura'] = max(1, math.ceil(palabras / 200)) if palabras else 0
+
+    # Validar que la imagen no sea una URL externa (solo rutas relativas internas o blob)
+    if 'imagen_principal' in datos_actualizacion:
+        img_val = datos_actualizacion.get('imagen_principal')
+        if img_val and isinstance(img_val, str) and img_val.strip().startswith('http'):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Solo se aceptan imágenes subidas; por favor use el botón de subir imagen.")
     
     for campo, valor in datos_actualizacion.items():
         setattr(obj, campo, valor)
@@ -491,6 +647,7 @@ def actualizar_noticia(noticia_id: int, datos: esquemas.NoticiaActualizar, db: S
         'imagen_principal': obj.imagen_principal,
         'categoria_id': obj.categoria_id,
         'destacada': obj.destacada,
+        'destacado': obj.destacado,
     }
 
     try:
@@ -506,9 +663,12 @@ def actualizar_noticia(noticia_id: int, datos: esquemas.NoticiaActualizar, db: S
         db.rollback()
     
     # Mapear respuesta
-    obj.tags = [t.strip() for t in (obj.meta_keywords or '').split(',') if t.strip()]
     obj.imagen = obj.imagen_principal
     obj.fecha = obj.fecha_publicacion
+    obj.destacado = obj.destacado
+    if obj.estado_id:
+        est = db.get(modelos.EstadoNoticia, obj.estado_id)
+        obj.estado = est.nombre if est else None
     if obj.categoria_id:
         cat = db.get(modelos.Categoria, obj.categoria_id)
         obj.categoria = cat.nombre if cat else None
@@ -602,9 +762,10 @@ def listar_noticias_admin(db: Session = Depends(get_db), _u: modelos.Usuario = D
     """
     noticias = db.query(modelos.Noticia).order_by(modelos.Noticia.fecha_publicacion.desc()).all()
     for noticia in noticias:
-        noticia.tags = [t.strip() for t in (noticia.meta_keywords or '').split(',') if t.strip()]
         noticia.imagen = noticia.imagen_principal
         noticia.fecha = noticia.fecha_publicacion
+        noticia.vistas = noticia.visitas or 0
+        noticia.compartidos = noticia.shares or 0
         if noticia.categoria_id:
             cat = db.get(modelos.Categoria, noticia.categoria_id)
             noticia.categoria = cat.nombre if cat else None
@@ -634,7 +795,67 @@ def listar_noticias_admin(db: Session = Depends(get_db), _u: modelos.Usuario = D
                 uu = db.get(modelos.Usuario, last.usuario_id)
                 noticia.last_edited_by = uu.nombre_usuario if uu else None
             noticia.last_edited_at = last.created_at
+        # Añadir estado textual para admin (si existe) o marcar como 'publicado' por defecto
+        if noticia.estado_id:
+            est = db.get(modelos.EstadoNoticia, noticia.estado_id)
+            noticia.estado = est.nombre if est else 'publicado'
+        else:
+            noticia.estado = 'publicado'
     return noticias
+
+
+@router.get("/admin/{noticia_id}", response_model=esquemas.NoticiaRespuesta)
+def obtener_noticia_admin(noticia_id: int, db: Session = Depends(get_db), _u: modelos.Usuario = Depends(require_role(["admin", "editor"]))):
+    """
+    Devuelve una noticia sin aplicar el filtro público (solo para admin/editor).
+    """
+    noticia = db.get(modelos.Noticia, noticia_id)
+    if not noticia:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Noticia no encontrada")
+
+    # Mapear respuesta sin filtrar por estado
+    noticia.imagen = noticia.imagen_principal
+    noticia.fecha = noticia.fecha_publicacion
+    noticia.vistas = noticia.visitas or 0
+    noticia.compartidos = noticia.shares or 0
+    if noticia.categoria_id:
+        cat = db.get(modelos.Categoria, noticia.categoria_id)
+        noticia.categoria = cat.nombre if cat else None
+    if noticia.autor_id:
+        u = db.get(modelos.Usuario, noticia.autor_id)
+        if u:
+            noticia.autor_info = esquemas.AutorInfo(
+                nombre=u.nombre_usuario,
+                titulo=u.titulo,
+                descripcion=u.biografia,
+                avatar=u.avatar,
+                nivel=u.nivel,
+                experiencia_años=u.experiencia_años,
+                articulos_total=u.articulos_publicados,
+                seguidores=u.seguidores,
+                precision=u.precision_rating,
+                especialidades=u.especialidades or [],
+                logros=u.logros or [],
+                top_anime=u.anime_favoritos or [],
+                redes_sociales=u.redes_sociales or {},
+                frase=u.frase_personal,
+            )
+    # Añadir info de última edición desde el historial
+    last = db.query(modelos.NoticiaHistorial).filter(modelos.NoticiaHistorial.noticia_id == noticia.id).order_by(modelos.NoticiaHistorial.created_at.desc()).first()
+    if last:
+        if last.usuario_id:
+            u = db.get(modelos.Usuario, last.usuario_id)
+            noticia.last_edited_by = u.nombre_usuario if u else None
+        noticia.last_edited_at = last.created_at
+
+    # Añadir estado textual
+    if noticia.estado_id:
+        est = db.get(modelos.EstadoNoticia, noticia.estado_id)
+        noticia.estado = est.nombre if est else 'publicado'
+    else:
+        noticia.estado = 'publicado'
+
+    return noticia
 
 
 @router.get("/{noticia_id}/historial", response_model=list[esquemas.NoticiaHistorialItem])

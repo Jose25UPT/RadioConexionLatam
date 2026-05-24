@@ -24,17 +24,18 @@ export default defineConfig({
     hmr: {
       overlay: false
     },
+    watch: {
+      usePolling: true,
+      interval: 1000,
+    },
     // Proxy de desarrollo: redirige llamadas al backend FastAPI
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: process.env.BACKEND_URL || 'http://localhost:8000',
         changeOrigin: true,
-        // Si tu backend ya sirve /api sin prefijo adicional, reescribe tal cual
-        // rewrite: (path) => path.replace(/^\/api/, '/api'),
       },
-      // Si las imágenes de noticias se sirven desde /media en el backend
-      '/media': {
-        target: 'http://localhost:8000',
+      '/uploads': {
+        target: process.env.BACKEND_URL || 'http://localhost:8000',
         changeOrigin: true,
       }
     }

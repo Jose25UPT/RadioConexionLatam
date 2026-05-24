@@ -28,14 +28,15 @@ export interface Noticia {
   imagen: string;
   categoria: string;
   programa?: string;
-  tags: string[];
   vistas: number;
   likes: number;
   comentarios: number;
   compartidos: number;
   destacada: boolean;
-  tiempo_lectura?: number; // minutos estimados
-  
+  destacado?: string;
+  estado?: string;
+  tiempo_lectura?: number;
+
   // Datos del autor
   autor_info?: AutorInfo;
   
@@ -55,27 +56,27 @@ export interface NoticiaCrear {
   titulo: string;
   resumen: string;
   contenido: string;
-  fecha?: string; // opcional, backend pone date.today si falta
+  fecha?: string;
   imagen: string;
   categoria: string;
   programa?: string;
-  tags: string[];
   destacada: boolean;
-  
+  destacado?: string;
+  estado?: string;
+
   // Datos del autor
   autor_info?: AutorInfo;
-  
+
   // Audio relacionado
   audio_url?: string;
   audio_titulo?: string;
-  
+
   // Configuración
   permitir_comentarios?: boolean;
   permitir_anonimos?: boolean;
-  
+
   // Artículos relacionados
   articulos_relacionados?: number[];
-  // Opcional para previsualizar antes de respuesta del backend
   tiempo_lectura?: number;
 }
 
@@ -88,6 +89,5 @@ export interface NoticiaActualizar {
   imagen?: string;
   categoria?: string;
   programa?: string;
-  tags?: string[];
   destacada?: boolean;
 }

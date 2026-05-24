@@ -1,8 +1,8 @@
-from sqlalchemy import Column, Integer, String, Text, Date, Boolean, DateTime, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Date, Boolean, DateTime, Float, ForeignKey, event, LargeBinary
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, JSONB, ARRAY, INET
-from app.base_datos import Base
+from app.base_datos import Base, SessionLocal
 
 class Rol(Base):
     __tablename__ = "roles"
@@ -53,6 +53,7 @@ class Usuario(Base):
     # Información del perfil
     nombre_completo = Column(String(200), nullable=True)
     avatar = Column(Text, nullable=True)
+    avatar_blob = Column(LargeBinary, nullable=True)
     titulo = Column(String(150), nullable=True)
     biografia = Column(Text, nullable=True)
     frase_personal = Column(Text, nullable=True)
@@ -91,6 +92,7 @@ class Noticia(Base):
     resumen = Column(Text, nullable=True)
     contenido = Column(Text, nullable=False)
     imagen_principal = Column(Text, nullable=True)
+    imagen_blob = Column(LargeBinary, nullable=True)
     galeria_imagenes = Column(JSONB, default=[])
     audio_url = Column(Text, nullable=True)
     video_url = Column(Text, nullable=True)
@@ -110,12 +112,42 @@ class Noticia(Base):
     meta_description = Column(String(500), nullable=True)
     meta_keywords = Column(Text, nullable=True)
     datos_estructurados = Column(JSONB, default={})
+    destacado = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relación con usuarios
     autor_usuario = relationship("Usuario", back_populates="noticias")
+
+    def __init__(self, **kwargs):
+        # Permitir recibir la clave 'autor' desde scripts antiguos (p.ej. poblar_db.py)
+        autor_val = kwargs.pop('autor', None)
+        fecha_val = kwargs.pop('fecha', None)
+        imagen_val = kwargs.pop('imagen', None)
+        categoria_val = kwargs.pop('categoria', None)
+        programa_val = kwargs.pop('programa', None)
+        vistas_val = kwargs.pop('vistas', None)
+        comentarios_val = kwargs.pop('comentarios', None)
+
+        super().__init__(**kwargs)
+
+        if autor_val:
+            # Guardar temporalmente el nombre del autor; un listener antes de insertar
+            # resolverá/creará el usuario y asignará `autor_id`.
+            setattr(self, '_autor_nombre_tmp', autor_val)
+        if fecha_val:
+            setattr(self, '_fecha_tmp', fecha_val)
+        if imagen_val:
+            setattr(self, '_imagen_tmp', imagen_val)
+        if categoria_val:
+            setattr(self, '_categoria_tmp', categoria_val)
+        if programa_val:
+            setattr(self, '_programa_tmp', programa_val)
+        if vistas_val is not None:
+            setattr(self, '_vistas_tmp', vistas_val)
+        if comentarios_val is not None:
+            setattr(self, '_comentarios_tmp', comentarios_val)
 
 class Comentario(Base):
     __tablename__ = "comentarios"
@@ -138,15 +170,87 @@ class Comentario(Base):
     ip_address = Column(INET, nullable=True)  # para IPv4 e IPv6
     user_agent = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now())
-    moderado_por = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
-    fecha_moderacion = Column(DateTime(timezone=True), nullable=True)
-    usuario_tipo = Column(String(50), nullable=True)  # ej: "Compositor", "Miembro desde 2010"
+
+
+# Listener: antes de insertar una Noticia, si se proporcionó un nombre en
+# la clave 'autor' (almacenado en `_autor_nombre_tmp`), buscamos o creamos
+# el usuario y asignamos `autor_id` para mantener compatibilidad con
+# `poblar_db.py` sin modificarlo.
+@event.listens_for(Noticia, 'before_insert')
+def _noticia_before_insert(mapper, connection, target):
+    autor_nombre = getattr(target, '_autor_nombre_tmp', None)
+    fecha_tmp = getattr(target, '_fecha_tmp', None)
+    imagen_tmp = getattr(target, '_imagen_tmp', None)
+    categoria_tmp = getattr(target, '_categoria_tmp', None)
+    if not autor_nombre:
+        # si no hay autor, aún podemos procesar otras temporales
+        pass
+
+    db = SessionLocal()
+    try:
+        if autor_nombre:
+            # Buscar por nombre completo o nombre de usuario
+            usuario = db.query(Usuario).filter(
+                (Usuario.nombre_completo == autor_nombre) | (Usuario.nombre_usuario == autor_nombre)
+            ).first()
+            if not usuario:
+                nombre_usuario = autor_nombre.replace(' ', '').lower()[:100]
+                email = f"{nombre_usuario}@example.local"
+                usuario = Usuario(
+                    nombre_usuario=nombre_usuario,
+                    email=email,
+                    password_hash='devpassword',
+                    nombre_completo=autor_nombre,
+                )
+                db.add(usuario)
+                db.commit()
+                db.refresh(usuario)
+
+            target.autor_id = usuario.id
+
+        if fecha_tmp:
+            try:
+                # esperar objeto tipo date en el script; asignar a fecha_publicacion
+                target.fecha_publicacion = fecha_tmp
+            except Exception:
+                pass
+
+        if imagen_tmp:
+            target.imagen_principal = imagen_tmp
+
+        if categoria_tmp:
+            # Resolver o crear categoría
+            from app.utils import generar_slug
+            cat = db.query(Categoria).filter(Categoria.nombre == categoria_tmp).first()
+            if not cat:
+                cat = Categoria(nombre=categoria_tmp, slug=generar_slug(categoria_tmp))
+                db.add(cat)
+                db.commit()
+                db.refresh(cat)
+            target.categoria_id = cat.id
+
+        # votos/estadísticas simples
+        vistas_tmp = getattr(target, '_vistas_tmp', None)
+        if vistas_tmp is not None:
+            try:
+                target.visitas = int(vistas_tmp)
+            except Exception:
+                pass
+
+    finally:
+        db.close()
+
+class Nota(Base):
+    __tablename__ = "notas"
+
+    id = Column(Integer, primary_key=True, index=True)
+    contenido = Column(String(2000), nullable=False)
+    autor_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    activa = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now())
-    moderado_por = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
-    fecha_moderacion = Column(DateTime(timezone=True), nullable=True)
-    usuario_tipo = Column(String(50), nullable=True)  # ej: "Compositor", "Miembro desde 2010"
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    autor = relationship("Usuario", foreign_keys=[autor_id])
 
 
 class NoticiaHistorial(Base):

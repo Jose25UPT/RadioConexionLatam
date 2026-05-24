@@ -27,7 +27,7 @@ export default function Footer() {
                 <div className="w-2 h-2 bg-pink-500 rounded-full animate-pulse"></div>
                 <span className="font-medium">EN VIVO</span>
                 <Headphones className="h-3 w-3" />
-                <span>2,847 oyentes</span>
+                <span>Siempre conectados</span>
               </div>
             </div>
           </div>
@@ -37,10 +37,8 @@ export default function Footer() {
             <h4 className="text-lg font-bold mb-4 text-pink-300">Enlaces</h4>
             <div className="grid grid-cols-2 gap-2">
               <a href="#inicio" className="text-gray-300 hover:text-white transition-colors text-sm">Inicio</a>
-              <a href="#programas" className="text-gray-300 hover:text-white transition-colors text-sm">Programas</a>
-              <a href="#noticias" className="text-gray-300 hover:text-white transition-colors text-sm">Noticias</a>
-              <a href="#equipo" className="text-gray-300 hover:text-white transition-colors text-sm">Equipo</a>
-              <a href="#contacto" className="text-gray-300 hover:text-white transition-colors text-sm">Contacto</a>
+              <a href="/noticias" className="text-gray-300 hover:text-white transition-colors text-sm">Noticias</a>
+              <a href="/notas" className="text-gray-300 hover:text-white transition-colors text-sm">Notas</a>
             </div>
           </div>
 
@@ -135,10 +133,10 @@ export default function Footer() {
         <div className="border-t border-white/20 mt-6 pt-6">
           <div className="text-center text-sm text-gray-400 space-y-1">
             <p className="font-extrabold text-base tracking-wide text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.55)] brightness-125">
-              Varnox Tech.
+              WebMasters Radio
             </p>
               <p className="flex items-center justify-center gap-2">
-                © 2025 Todos los derechos reservados.
+                © {new Date().getFullYear()} Todos los derechos reservados.
                 <img
                   src="/logovarnox.png"
                   alt="Varnox Tech"

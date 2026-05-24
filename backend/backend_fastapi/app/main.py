@@ -4,6 +4,8 @@ from app.rutas_noticias import router as noticias_router
 from app.rutas_uploads import router as uploads_router
 from app.rutas_auth import router as auth_router
 from app.rutas_admin import router as admin_router
+from app.rutas_notas import router as notas_router
+from app.rutas_fanschoice import router as fanschoice_router
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from sqlalchemy.orm import Session
@@ -43,6 +45,8 @@ app.include_router(noticias_router)
 app.include_router(uploads_router)
 app.include_router(auth_router)
 app.include_router(admin_router)
+app.include_router(notas_router)
+app.include_router(fanschoice_router)
 
 # Servir archivos estáticos (imágenes subidas)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")

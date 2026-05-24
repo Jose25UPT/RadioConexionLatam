@@ -88,8 +88,10 @@ def registrar_usuario(datos: esquemas.UserCreate, db: Session = Depends(get_db),
 @router.post("/login", response_model=esquemas.Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
 	user = get_user_by_username_or_email(db, form_data.username)
-	if not user or not verify_password(form_data.password, user.password_hash):  # Actualizado
+	if not user or not verify_password(form_data.password, user.password_hash):
 		raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciales inválidas")
+	if not user.activo:
+		raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuario inactivo. Contacta al administrador.")
 	
 	# Obtener el nombre del rol del usuario
 	user_rol_name = "usuario"  # default

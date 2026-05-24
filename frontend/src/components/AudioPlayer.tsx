@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Radio, Heart, Share2, Maximize2, Minimize2, ChevronUp, ChevronDown } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Share2, Maximize2, Minimize2, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface AudioPlayerProps {
   onToggleVisibility?: () => void;
@@ -14,8 +14,8 @@ export default function AudioPlayer({ onToggleVisibility }: AudioPlayerProps) {
   const [volume, setVolume] = useState(0.7);
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentShow, setCurrentShow] = useState('Conexión Musical en Vivo');
-  const [currentSong, setCurrentSong] = useState('Música Latina - Éxitos del Momento');
-  const [listeners, setListeners] = useState(2847);
+  const [currentSong, setCurrentSong] = useState('Siempre conectados');
+  const [shareCopied, setShareCopied] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isHiddenByScroll, setIsHiddenByScroll] = useState(false);
   const [manualCollapsed, setManualCollapsed] = useState(false);
@@ -112,12 +112,18 @@ export default function AudioPlayer({ onToggleVisibility }: AudioPlayerProps) {
     }
   }, [volume, isMuted]);
 
-  // Manejar oyentes simulados y metadata (si disponible)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setListeners(prev => prev + Math.floor(Math.random() * 10) - 5);
-    }, 5000);
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText('https://www.radioconexionlatam.net.pe/');
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 3000);
+    } catch {
+      // fallback silencioso
+    }
+  };
 
+  // Manejar metadata (si disponible)
+  useEffect(() => {
     let eventSource: EventSource | null = null;
     if (metadataUrl) {
       eventSource = new EventSource(metadataUrl);
@@ -144,7 +150,6 @@ export default function AudioPlayer({ onToggleVisibility }: AudioPlayerProps) {
     }
 
     return () => {
-      clearInterval(interval);
       eventSource?.close();
     };
   }, []);
@@ -224,12 +229,6 @@ export default function AudioPlayer({ onToggleVisibility }: AudioPlayerProps) {
                 )}
               </div>
               
-              {/* Mini Actions */}
-              <div className="hidden sm:flex items-center space-x-2">
-                <button className="text-gray-400 hover:text-white transition-colors p-1">
-                  <Heart className="h-4 w-4" />
-                </button>
-              </div>
             </div>
 
             {/* Center Section - Main Controls */}
@@ -281,14 +280,6 @@ export default function AudioPlayer({ onToggleVisibility }: AudioPlayerProps) {
 
             {/* Right Section - Volume & Listeners */}
             <div className="flex items-center space-x-4 flex-1 justify-end min-w-0 max-w-xs lg:max-w-sm">
-              {/* Listeners count */}
-              <div className="hidden md:flex items-center space-x-2 text-gray-400 text-sm">
-                <Radio className="h-4 w-4" />
-                <span className="text-xs lg:text-sm">
-                  {listeners.toLocaleString()} oyentes
-                </span>
-              </div>
-              
               {/* Volume Control */}
               <div className="hidden lg:flex items-center space-x-3 max-w-32">
                 <button 
@@ -383,12 +374,6 @@ export default function AudioPlayer({ onToggleVisibility }: AudioPlayerProps) {
               <div className="text-center mb-6">
                 <h4 className="text-xl font-bold mb-2">{currentShow}</h4>
                 <p className="text-white/80 mb-4">{currentSong}</p>
-                <div className="flex items-center justify-center space-x-4 text-sm text-white/70">
-                  <span className="flex items-center space-x-1">
-                    <Radio className="h-4 w-4 text-green-400" />
-                    <span>{listeners.toLocaleString()} oyentes</span>
-                  </span>
-                </div>
               </div>
 
               {/* Visualizer */}
@@ -408,11 +393,7 @@ export default function AudioPlayer({ onToggleVisibility }: AudioPlayerProps) {
               )}
 
               {/* Main Controls */}
-              <div className="flex items-center justify-center space-x-6 mb-6">
-                <button className="text-white/80 hover:text-white transition-colors p-2">
-                  <Heart className="h-6 w-6" />
-                </button>
-                
+              <div className="flex items-center justify-center space-x-6 mb-4">
                 <button
                   onClick={togglePlay}
                   className="bg-white hover:bg-gray-100 text-gray-900 p-4 rounded-full transition-all duration-300 transform hover:scale-110 shadow-xl"
@@ -423,9 +404,17 @@ export default function AudioPlayer({ onToggleVisibility }: AudioPlayerProps) {
                     <Play className="h-8 w-8 ml-1" />
                   )}
                 </button>
-                
-                <button className="text-white/80 hover:text-white transition-colors p-2">
-                  <Share2 className="h-6 w-6" />
+              </div>
+
+              <div className="flex flex-col items-center mb-6">
+                <button
+                  onClick={handleShare}
+                  className="flex items-center gap-2 text-white/80 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
+                >
+                  <Share2 className="h-5 w-5" />
+                  <span className="text-sm">
+                    {shareCopied ? 'enlace de la pagina web copiado' : 'Compartir'}
+                  </span>
                 </button>
               </div>
 

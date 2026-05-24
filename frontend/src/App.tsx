@@ -26,6 +26,11 @@ import AdminDashboard from './secure_panel_rva_gestor_2025/AdminDashboard';
 import { PANEL_BASE, PANEL_LOGIN } from './secure_panel_rva_gestor_2025/secureRoute';
 import { RequireAuth } from './secure_panel_rva_gestor_2025/auth';
 import MiPerfil from './secure_panel_rva_gestor_2025/MiPerfil';
+import GestorCategorias from './secure_panel_rva_gestor_2025/GestorCategorias';
+import GestorNotas from './secure_panel_rva_gestor_2025/GestorNotas';
+import TodasLasNotas from './pages/TodasLasNotas';
+import FansChoiceResultados from './pages/FansChoiceResultados';
+import NotFound from './components/NotFound';
 
 const AuthWrapper = ({ children, roles }: { children: React.ReactNode, roles?: any }) => (
   <RequireAuth roles={roles}>{children}</RequireAuth>
@@ -71,10 +76,10 @@ function App() {
             </RequireAuth>
           }
         />
-        <Route 
-          path={PANEL_BASE} 
+        <Route
+          path={PANEL_BASE}
           element={
-            <AuthWrapper roles={["ADMIN","EDITOR"]}>
+            <AuthWrapper roles={["EDITOR"]}>
               <div className="min-h-screen bg-white">
                 <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
                 <PanelAdministrador />
@@ -84,10 +89,10 @@ function App() {
             </AuthWrapper>
           }
         />
-        <Route 
-          path={`${PANEL_BASE}/editar/:id`} 
+        <Route
+          path={`${PANEL_BASE}/editar/:id`}
           element={
-            <AuthWrapper roles={["ADMIN","EDITOR","REDACTOR"]}>
+            <AuthWrapper roles={["EDITOR"]}>
               <div className="min-h-screen bg-white">
                 <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
                 <EditarNoticia />
@@ -97,10 +102,10 @@ function App() {
             </AuthWrapper>
           }
         />
-        <Route 
-          path={`${PANEL_BASE}/agregar`} 
+        <Route
+          path={`${PANEL_BASE}/agregar`}
           element={
-            <AuthWrapper roles={["ADMIN","EDITOR"]}>
+            <AuthWrapper roles={["EDITOR"]}>
               <div className="min-h-screen bg-white">
                 <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
                 <AgregarNoticia />
@@ -111,8 +116,22 @@ function App() {
           }
         />
 
+        <Route
+          path={`${PANEL_BASE}/categorias`}
+          element={
+            <AuthWrapper roles={["EDITOR"]}>
+              <div className="min-h-screen bg-white">
+                <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+                <GestorCategorias />
+                <Footer />
+                <AudioPlayer onToggleVisibility={handleTogglePlayerVisibility} />
+              </div>
+            </AuthWrapper>
+          }
+        />
+
         {/* Ruta para gestionar perfil del autor/editor */}
-        <Route 
+        <Route
           path={`${PANEL_BASE}/mi-perfil`} 
           element={
             <AuthWrapper roles={["ADMIN","EDITOR"]}>
@@ -126,8 +145,49 @@ function App() {
           }
         />
         
+        {/* Ruta pública: todas las notas */}
+        <Route
+          path="/notas"
+          element={
+            <div className="min-h-screen bg-white">
+              <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+              <TodasLasNotas />
+              <Footer />
+              <AudioPlayer onToggleVisibility={handleTogglePlayerVisibility} />
+            </div>
+          }
+        />
+
+        {/* Panel: gestor de notas */}
+        <Route
+          path={`${PANEL_BASE}/notas`}
+          element={
+            <AuthWrapper roles={["EDITOR"]}>
+              <div className="min-h-screen bg-white">
+                <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+                <GestorNotas />
+                <Footer />
+                <AudioPlayer onToggleVisibility={handleTogglePlayerVisibility} />
+              </div>
+            </AuthWrapper>
+          }
+        />
+
+        {/* Resultados Fans Choice */}
+        <Route
+          path="/fans-choice-resultados"
+          element={
+            <div className="min-h-screen bg-white">
+              <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+              <FansChoiceResultados />
+              <Footer />
+              <AudioPlayer onToggleVisibility={handleTogglePlayerVisibility} />
+            </div>
+          }
+        />
+
         {/* Ruta para todas las noticias */}
-        <Route 
+        <Route
           path="/noticias" 
           element={
             <div className="min-h-screen bg-white">
@@ -162,11 +222,11 @@ function App() {
             <div className="min-h-screen bg-white">
               <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
               <Hero onPlayLive={handlePlayLive} />
-              <Programs />
+              {/* <Programs /> */}
+              {/* <Team /> */}
               <FansChoiceBanner />
               <News />
               <SocialMedia />
-              <Team />
               <Footer />
               <AudioPlayer
                 onToggleVisibility={handleTogglePlayerVisibility}
@@ -174,6 +234,8 @@ function App() {
             </div>
           }
         />
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
       {/* Floating social buttons (global) */}
       <SocialFloating />

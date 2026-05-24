@@ -41,23 +41,24 @@ export default function SocialMedia() {
 
   const renderFacebook = () => (
     <>
-      <div className="p-4 flex items-center justify-between">
+      <div className="px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-sm">
             <Facebook className="w-5 h-5" />
           </div>
           <div>
-            <div className="font-semibold">Facebook</div>
+            <div className="font-semibold text-sm">Facebook</div>
             <div className="text-xs text-stone-500">{followers.facebook} seguidores</div>
           </div>
         </div>
         <a href={facebookPage} target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm shadow hover:brightness-110">Abrir</a>
       </div>
-      <div className="mx-3 mb-4 rounded-2xl overflow-hidden ring-1 ring-black/10 h-[560px] bg-white">
+      {/* Width 348 = 350px content area − 2px for iframe border rendering */}
+      <div className="mb-2 rounded-xl overflow-hidden ring-1 ring-black/10 flex-1 bg-white" style={{ height: 590 }}>
         {facebookMode === 'video' && facebookVideoUrl ? (
           <iframe
             title="Facebook Video"
-            src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(facebookVideoUrl)}&autoplay=1&mute=1&show_text=false&width=360&height=560`}
+            src={`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(facebookVideoUrl)}&autoplay=1&mute=1&show_text=false&width=348&height=590`}
             style={{ border: 'none', overflow: 'hidden' }}
             scrolling="no"
             frameBorder={0}
@@ -68,7 +69,7 @@ export default function SocialMedia() {
         ) : (
           <iframe
             title="Facebook Page"
-            src={`https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(facebookPage)}&tabs=timeline&width=360&height=560&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId=`}
+            src={`https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(facebookPage)}&tabs=timeline&width=348&height=590&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true&appId=`}
             style={{ border: 'none', overflow: 'hidden' }}
             scrolling="no"
             frameBorder={0}
@@ -83,19 +84,19 @@ export default function SocialMedia() {
 
   const renderInstagram = () => (
     <>
-      <div className="p-4 flex items-center justify-between">
+      <div className="px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-sm">
             <Instagram className="w-5 h-5" />
           </div>
           <div>
-            <div className="font-semibold">Instagram</div>
+            <div className="font-semibold text-sm">Instagram</div>
             <div className="text-xs text-stone-500">{followers.instagram} seguidores</div>
           </div>
         </div>
         <a href={instagramPage} target="_blank" rel="noopener noreferrer" className="bg-gradient-to-br from-pink-500 to-purple-600 text-white px-3 py-1.5 rounded-lg text-sm shadow hover:brightness-110">Abrir</a>
       </div>
-      <div className="mx-3 mb-4 rounded-2xl overflow-hidden ring-1 ring-black/10 h-[560px] bg-gray-50">
+      <div className="mb-2 rounded-xl overflow-hidden ring-1 ring-black/10 bg-gray-50" style={{ height: 590 }}>
         {showEmbeds ? (
           <div className="h-full overflow-auto">
             {instagramEmbeds.slice(0, 4).map((url: string, idx: number) => (
@@ -103,10 +104,14 @@ export default function SocialMedia() {
             ))}
           </div>
         ) : (
-          <div className="h-full flex flex-col items-center justify-center text-sm text-stone-700">
-            <p className="font-semibold mb-2">Instagram</p>
-            <p className="text-xs mb-3 px-6 text-center">Vista previa del perfil disponible. Pulsa el botón para abrir el perfil oficial.</p>
-            <a href={instagramPage} target="_blank" rel="noopener noreferrer" className="inline-block bg-gradient-to-br from-pink-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm">Abrir Instagram</a>
+          <div className="h-full flex flex-col items-center justify-center gap-3 text-sm text-stone-700 px-6 text-center">
+            <Instagram className="w-10 h-10 text-pink-400 opacity-50" />
+            <p className="font-semibold">Instagram</p>
+            <p className="text-xs text-stone-500 leading-relaxed">Vista previa del perfil disponible.<br />Pulsa el botón para abrir el perfil oficial.</p>
+            <a href={instagramPage} target="_blank" rel="noopener noreferrer"
+               className="bg-gradient-to-br from-pink-500 to-purple-600 text-white px-5 py-2 rounded-full text-sm font-medium shadow">
+              Abrir Instagram
+            </a>
           </div>
         )}
       </div>
@@ -115,28 +120,30 @@ export default function SocialMedia() {
 
   const renderSpotify = () => (
     <>
-      <div className="p-4 flex items-center justify-between">
+      <div className="px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center text-white shadow-sm">
             <Music className="w-5 h-5" />
           </div>
           <div>
-            <div className="font-semibold">Spotify</div>
+            <div className="font-semibold text-sm">Spotify</div>
             <div className="text-xs text-stone-500">Podcast / Episodios</div>
           </div>
         </div>
         <a href={spotifyUrl} target="_blank" rel="noopener noreferrer" className="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm shadow hover:brightness-110">Abrir</a>
       </div>
-      <div className="mx-3 mb-4 rounded-2xl overflow-hidden ring-1 ring-black/10 h-[560px] bg-white">
+      <div className="mb-2 rounded-xl overflow-hidden ring-1 ring-black/10 bg-white" style={{ height: 590 }}>
         {spotifyEmbed ? (
           <SpotifyEmbed embedUrl={spotifyEmbed} openUrl={spotifyUrl} />
         ) : (
-          <div className="h-full flex items-center justify-center text-sm text-stone-700">
-            <div>
-              <p className="font-semibold mb-2">Vista previa no disponible</p>
-              <p className="text-xs mb-3 text-center px-6">Configura VITE_SPOTIFY_EMBED en tu .env para ver una previsualización embebida.</p>
-              <a href={spotifyUrl} target="_blank" rel="noopener noreferrer" className="inline-block bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Abrir Spotify</a>
-            </div>
+          <div className="h-full flex flex-col items-center justify-center gap-3 text-sm text-stone-700 px-6 text-center">
+            <Music className="w-10 h-10 text-green-500 opacity-50" />
+            <p className="font-semibold">Spotify</p>
+            <p className="text-xs text-stone-500 leading-relaxed">Agrega tu URL de embed de Spotify en el archivo <code className="bg-stone-100 px-1 rounded">.env</code></p>
+            <a href={spotifyUrl} target="_blank" rel="noopener noreferrer"
+               className="bg-green-600 text-white px-5 py-2 rounded-full text-sm font-medium shadow">
+              Abrir Spotify
+            </a>
           </div>
         )}
       </div>
@@ -145,18 +152,23 @@ export default function SocialMedia() {
 
   return (
     <section id="redes" className="py-16 bg-gradient-to-br from-purple-50 to-pink-50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
           <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
             Redes Sociales
           </h2>
-         
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className={
+          cardStyle === 'iphone'
+            ? 'flex flex-col md:flex-row justify-center items-start gap-8 flex-wrap'
+            : 'grid grid-cols-1 md:grid-cols-3 gap-6'
+        }>
           {/* Facebook preview */}
           {cardStyle === 'iphone' ? (
-            <DeviceFrame gradient="blue">{renderFacebook()}</DeviceFrame>
+            <div className="w-full max-w-[360px] flex-shrink-0">
+              <DeviceFrame gradient="blue">{renderFacebook()}</DeviceFrame>
+            </div>
           ) : (
           <div className={cardBase}>
             {cardStyle === 'aurora' && (
@@ -206,7 +218,9 @@ export default function SocialMedia() {
 
           {/* Instagram preview */}
           {cardStyle === 'iphone' ? (
-            <DeviceFrame gradient="purple">{renderInstagram()}</DeviceFrame>
+            <div className="w-full max-w-[360px] flex-shrink-0">
+              <DeviceFrame gradient="purple">{renderInstagram()}</DeviceFrame>
+            </div>
           ) : (
           <div className={cardBase}>
             {cardStyle === 'aurora' && (
@@ -256,7 +270,9 @@ export default function SocialMedia() {
 
           {/* Spotify preview */}
           {cardStyle === 'iphone' ? (
-            <DeviceFrame gradient="green">{renderSpotify()}</DeviceFrame>
+            <div className="w-full max-w-[360px] flex-shrink-0">
+              <DeviceFrame gradient="green">{renderSpotify()}</DeviceFrame>
+            </div>
           ) : (
           <div className={cardBase}>
             {cardStyle === 'aurora' && (
@@ -284,7 +300,8 @@ export default function SocialMedia() {
                   width="100%"
                   height="100%"
                   frameBorder={0}
-                  allow="encrypted-media; autoplay; clipboard-write"
+                  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                  allowFullScreen
                   className="w-full h-full"
                 />
               ) : (
@@ -395,7 +412,8 @@ function SpotifyEmbed({ embedUrl, openUrl }: { embedUrl: string; openUrl: string
         height="100%"
         frameBorder={0}
         loading="lazy"
-        allow="encrypted-media; autoplay; clipboard-write"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        allowFullScreen
         className="w-full h-full"
         onLoad={() => setLoaded(true)}
       />
