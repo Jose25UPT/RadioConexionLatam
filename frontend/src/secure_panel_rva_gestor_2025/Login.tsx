@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Lock, User, LogIn } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Lock, User, LogIn, AlertTriangle } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PANEL_BASE } from './secureRoute';
 import { API_BASE } from '../lib/api';
 import { decodeJwt } from './auth';
@@ -11,6 +11,8 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const sessionExpired = searchParams.get('expired') === '1';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,6 +65,12 @@ const Login: React.FC = () => {
           <h1 className="text-3xl font-bold text-amber-800 font-otaku-title">Acceso Seguro</h1>
           <p className="text-stone-600 mt-2 font-otaku-body">Panel interno de gestión</p>
         </div>
+        {sessionExpired && (
+          <div className="mb-6 flex items-start gap-3 bg-amber-50 border border-amber-300 text-amber-800 rounded-lg p-4 text-sm">
+            <AlertTriangle size={18} className="flex-shrink-0 mt-0.5" />
+            <span>Tu sesión ha expirado. Por favor inicia sesión nuevamente para continuar.</span>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-stone-700 mb-1 font-otaku-elegant">Usuario o Email</label>

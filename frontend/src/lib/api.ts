@@ -36,6 +36,18 @@ export async function fetchJson<T = any>(path: string, init?: RequestInit): Prom
   const url = `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
   const res = await fetch(url, { ...init, headers });
   if (!res.ok) {
+    if (res.status === 401 && typeof localStorage !== 'undefined') {
+      const hadToken = localStorage.getItem('auth_token');
+      if (hadToken) {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_role');
+        if (typeof window !== 'undefined' &&
+            window.location.pathname.startsWith('/secure_panel_rva_gestor_2025')) {
+          window.location.href = '/secure_panel_rva_gestor_2025/login?expired=1';
+        }
+      }
+      throw new Error('Tu sesión ha expirado. Por favor inicia sesión nuevamente.');
+    }
     let detail = '';
     try {
       const body = await res.json();

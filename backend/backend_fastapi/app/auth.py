@@ -10,7 +10,7 @@ import os
 # Configuración JWT
 SECRET_KEY = os.getenv("SECRET_KEY") or os.getenv("JWT_SECRET", "change_this_dev_secret")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60  # 1 hora por defecto
+ACCESS_TOKEN_EXPIRE_MINUTES = 480  # 8 horas
 
 def hash_password(password: str) -> str:
     """Hash password usando bcrypt directamente"""

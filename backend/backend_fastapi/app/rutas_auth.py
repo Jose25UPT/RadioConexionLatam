@@ -100,7 +100,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 		if user_rol:
 			user_rol_name = user_rol.nombre
 	
-	token = crear_access_token({"sub": user.nombre_usuario, "rol": user_rol_name}, expires_delta=timedelta(minutes=60))
+	token = crear_access_token({"sub": user.nombre_usuario, "rol": user_rol_name})
 	return {"access_token": token, "token_type": "bearer"}
 
 @router.get("/me", response_model=esquemas.UserPublic)
