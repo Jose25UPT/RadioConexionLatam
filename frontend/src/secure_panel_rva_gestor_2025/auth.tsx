@@ -3,7 +3,7 @@ import LoginPanel from './Login';
 import { Navigate } from 'react-router-dom';
 import { PANEL_BASE } from './secureRoute';
 
-export type Role = 'ADMIN' | 'EDITOR' | 'VIEWER';
+export type Role = 'ADMIN' | 'EDITOR' | 'INTERNACIONAL' | 'VIEWER';
 
 function padBase64(b64: string): string {
   const pad = b64.length % 4;
@@ -53,6 +53,7 @@ export function getUserRole(): Role | null {
 
   const roleStr = String(candidates[0]).toUpperCase();
   if (roleStr.includes('ADMIN')) return 'ADMIN';
+  if (roleStr.includes('INTERNACIONAL')) return 'INTERNACIONAL';
   if (roleStr.includes('EDITOR')) return 'EDITOR';
   // Unificar AUTOR/REDACTOR/MOD* como EDITOR o VIEWER
   if (roleStr.includes('REDACTOR') || roleStr.includes('AUTHOR') || roleStr.includes('WRITER') || roleStr.includes('AUTOR') || roleStr.includes('MOD')) return 'EDITOR';
@@ -65,7 +66,7 @@ export function userHasRole(required: Role | Role[] | undefined): boolean {
   if (!role) return false;
   const requiredList = Array.isArray(required) ? required : [required];
   // Jerarquía simple: ADMIN > EDITOR > REDACTOR > MODERATOR > VIEWER
-  const weight: Record<Role, number> = { ADMIN: 3, EDITOR: 2, VIEWER: 1 };
+  const weight: Record<Role, number> = { ADMIN: 3, EDITOR: 2, INTERNACIONAL: 2, VIEWER: 1 };
   // Permitir si el rol está explícitamente en la lista
   if (requiredList.includes(role)) return true;
   // O si su jerarquía es mayor o igual al mínimo requerido (para que ADMIN pase en rutas de EDITOR/REDACTOR)

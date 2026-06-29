@@ -104,9 +104,28 @@ def crear_admin_y_editor_por_defecto():
             db.refresh(rol_editor)
             print(f"Rol editor creado con ID: {rol_editor.id}")
 
-        # Migrar usuarios con roles distintos a admin/editor hacia editor, y eliminar roles extra
-        print("Normalizando roles a solo 'admin' y 'editor'...")
-        roles_permitidos = {"admin": rol_admin.id, "editor": rol_editor.id}
+        # Crear rol internacional si no existe
+        rol_internacional = db.query(modelos.Rol).filter_by(nombre="internacional").first()
+        if not rol_internacional:
+            print("Creando rol internacional...")
+            rol_internacional = modelos.Rol(
+                nombre="internacional",
+                descripcion="Editor de contenido internacional (noticias en sección separada)",
+                permisos={
+                    "create_articles": True,
+                    "edit_articles": True,
+                    "publish_articles": True,
+                    "delete_articles": False
+                }
+            )
+            db.add(rol_internacional)
+            db.commit()
+            db.refresh(rol_internacional)
+            print(f"Rol internacional creado con ID: {rol_internacional.id}")
+
+        # Migrar usuarios con roles distintos a admin/editor/internacional hacia editor, y eliminar roles extra
+        print("Normalizando roles a 'admin', 'editor' e 'internacional'...")
+        roles_permitidos = {"admin": rol_admin.id, "editor": rol_editor.id, "internacional": rol_internacional.id}
         # Asignar 'editor' a cualquier usuario con rol no permitido
         usuarios_no_permitidos = (
             db.query(modelos.Usuario)
@@ -120,7 +139,7 @@ def crear_admin_y_editor_por_defecto():
             db.commit()
             print(f"Usuarios normalizados: {len(usuarios_no_permitidos)}")
 
-        # Eliminar roles que no sean admin/editor
+        # Eliminar roles que no sean admin/editor/internacional
         roles_extra = db.query(modelos.Rol).filter(~modelos.Rol.nombre.in_(list(roles_permitidos.keys()))).all()
         for r in roles_extra:
             db.delete(r)

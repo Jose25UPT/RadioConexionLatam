@@ -9,6 +9,7 @@ const AUTOPLAY_MS = 5000;
 
 export default function News() {
   const navigate = useNavigate();
+  const [tab, setTab] = useState<'nacional' | 'internacional'>('nacional');
   const [noticias, setNoticias] = useState<Noticia[]>([]);
   const [loading, setLoading] = useState(true);
   const [slide, setSlide] = useState(0);
@@ -17,12 +18,17 @@ export default function News() {
   const [cardW, setCardW] = useState(0);
   const [perView, setPerView] = useState(3);
 
-  // Cargar las 9 noticias destacadas más recientes
+  // Cargar las 9 noticias destacadas según el tab activo
   useEffect(() => {
     let mounted = true;
+    setLoading(true);
+    setSlide(0);
+    const filtro = tab === 'nacional'
+      ? '/api/noticias/?destacada=true&es_internacional=false&limite=9'
+      : '/api/noticias/?destacada=true&es_internacional=true&limite=9';
     (async () => {
       try {
-        const data = await fetchJson<Noticia[]>('/api/noticias/?destacada=true&limite=9');
+        const data = await fetchJson<Noticia[]>(filtro);
         if (!mounted) return;
         const sorted = (Array.isArray(data) ? data : [])
           .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
@@ -32,7 +38,7 @@ export default function News() {
       finally { if (mounted) setLoading(false); }
     })();
     return () => { mounted = false; };
-  }, []);
+  }, [tab]);
 
   // Medir el ancho real de una tarjeta y cuántas caben
   const measure = useCallback(() => {
@@ -111,6 +117,29 @@ export default function News() {
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold bg-gradient-to-r from-cyan-300 via-blue-300 to-fuchsia-300 bg-clip-text text-transparent leading-tight">
               Últimas Noticias<br className="hidden sm:block" /> Destacadas
             </h2>
+            {/* Tabs Nacional / Internacional */}
+            <div className="flex items-center gap-2 mt-4">
+              <button
+                onClick={() => setTab('nacional')}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${
+                  tab === 'nacional'
+                    ? 'bg-cyan-400 text-slate-900'
+                    : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white border border-white/15'
+                }`}
+              >
+                Nacional
+              </button>
+              <button
+                onClick={() => setTab('internacional')}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${
+                  tab === 'internacional'
+                    ? 'bg-emerald-400 text-slate-900'
+                    : 'bg-white/10 text-white/60 hover:bg-white/20 hover:text-white border border-white/15'
+                }`}
+              >
+                Internacional
+              </button>
+            </div>
           </div>
 
           {/* Flechas desktop */}

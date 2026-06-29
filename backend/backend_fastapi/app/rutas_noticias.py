@@ -92,6 +92,7 @@ def listar_noticias(
     autor_id: int = None,
     limite: int = 20,
     offset: int = 0,
+    es_internacional: bool = None,
     db: Session = Depends(get_db)
 ):
     """
@@ -136,7 +137,25 @@ def listar_noticias(
                 modelos.Noticia.resumen.contains(buscar)
             )
         )
-    
+
+    # Filtrar por rol del autor (internacional vs nacional)
+    if es_internacional is not None:
+        query = query.join(
+            modelos.Usuario,
+            modelos.Usuario.id == modelos.Noticia.autor_id,
+            isouter=True,
+        ).join(
+            modelos.Rol,
+            modelos.Rol.id == modelos.Usuario.rol_id,
+            isouter=True,
+        )
+        if es_internacional:
+            query = query.filter(modelos.Rol.nombre == 'internacional')
+        else:
+            query = query.filter(
+                or_(modelos.Rol.nombre != 'internacional', modelos.Rol.nombre == None)
+            )
+
     # Aplicar paginación y ordenamiento
     noticias = (
         query.order_by(modelos.Noticia.fecha_publicacion.desc())
@@ -197,7 +216,7 @@ def listar_categorias(db: Session = Depends(get_db)):
     return [fila[0] for fila in filas if fila and fila[0]]
 
 @router.post("/categorias/", status_code=201)
-def crear_categoria(nombre: str, db: Session = Depends(get_db), _u: modelos.Usuario = Depends(require_role(["admin", "editor"]))):
+def crear_categoria(nombre: str, db: Session = Depends(get_db), _u: modelos.Usuario = Depends(require_role(["admin", "editor", "internacional"]))):
     nombre = nombre.strip()
     if not nombre:
         raise HTTPException(status_code=400, detail="El nombre no puede estar vacío")
@@ -216,7 +235,7 @@ def crear_categoria(nombre: str, db: Session = Depends(get_db), _u: modelos.Usua
     return {"nombre": nueva.nombre}
 
 @router.delete("/categorias/", status_code=204)
-def eliminar_categoria(nombre: str, db: Session = Depends(get_db), _u: modelos.Usuario = Depends(require_role(["admin", "editor"]))):
+def eliminar_categoria(nombre: str, db: Session = Depends(get_db), _u: modelos.Usuario = Depends(require_role(["admin", "editor", "internacional"]))):
     nombre_lower = nombre.strip().lower()
     cat = db.query(modelos.Categoria).filter(
         func.lower(modelos.Categoria.nombre) == nombre_lower
@@ -744,7 +763,7 @@ def obtener_estadisticas(db: Session = Depends(get_db)):
 
 
 @router.get("/admin/all", response_model=list[esquemas.NoticiaRespuesta])
-def listar_noticias_admin(db: Session = Depends(get_db), _u: modelos.Usuario = Depends(require_role(["admin", "editor"]))):
+def listar_noticias_admin(db: Session = Depends(get_db), _u: modelos.Usuario = Depends(require_role(["admin", "editor", "internacional"]))):
     """
     Devuelve todas las noticias (uso interno admin/editor).
     """
@@ -793,7 +812,7 @@ def listar_noticias_admin(db: Session = Depends(get_db), _u: modelos.Usuario = D
 
 
 @router.get("/admin/{noticia_id}", response_model=esquemas.NoticiaRespuesta)
-def obtener_noticia_admin(noticia_id: int, db: Session = Depends(get_db), _u: modelos.Usuario = Depends(require_role(["admin", "editor"]))):
+def obtener_noticia_admin(noticia_id: int, db: Session = Depends(get_db), _u: modelos.Usuario = Depends(require_role(["admin", "editor", "internacional"]))):
     """
     Devuelve una noticia sin aplicar el filtro público (solo para admin/editor).
     """

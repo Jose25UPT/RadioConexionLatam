@@ -81,7 +81,7 @@ function App() {
         <Route
           path={PANEL_BASE}
           element={
-            <AuthWrapper roles={["EDITOR"]}>
+            <AuthWrapper roles={["EDITOR", "INTERNACIONAL"]}>
               <div className="min-h-screen bg-white">
                 <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
                 <PanelAdministrador />
@@ -94,7 +94,7 @@ function App() {
         <Route
           path={`${PANEL_BASE}/editar/:id`}
           element={
-            <AuthWrapper roles={["EDITOR"]}>
+            <AuthWrapper roles={["EDITOR", "INTERNACIONAL"]}>
               <div className="min-h-screen bg-white">
                 <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
                 <EditarNoticia />
@@ -107,7 +107,7 @@ function App() {
         <Route
           path={`${PANEL_BASE}/agregar`}
           element={
-            <AuthWrapper roles={["EDITOR"]}>
+            <AuthWrapper roles={["EDITOR", "INTERNACIONAL"]}>
               <div className="min-h-screen bg-white">
                 <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
                 <AgregarNoticia />
@@ -121,7 +121,7 @@ function App() {
         <Route
           path={`${PANEL_BASE}/categorias`}
           element={
-            <AuthWrapper roles={["EDITOR"]}>
+            <AuthWrapper roles={["EDITOR", "INTERNACIONAL"]}>
               <div className="min-h-screen bg-white">
                 <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
                 <GestorCategorias />
@@ -164,7 +164,7 @@ function App() {
         <Route
           path={`${PANEL_BASE}/notas`}
           element={
-            <AuthWrapper roles={["EDITOR"]}>
+            <AuthWrapper roles={["EDITOR", "INTERNACIONAL"]}>
               <div className="min-h-screen bg-white">
                 <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
                 <GestorNotas />
@@ -179,7 +179,7 @@ function App() {
         <Route
           path={`${PANEL_BASE}/timeline`}
           element={
-            <AuthWrapper roles={["EDITOR"]}>
+            <AuthWrapper roles={["EDITOR", "INTERNACIONAL"]}>
               <div className="min-h-screen bg-white">
                 <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
                 <GestorTimeline />
