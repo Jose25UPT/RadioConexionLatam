@@ -36,6 +36,7 @@ export interface Noticia {
   destacado?: string;
   estado?: string;
   tiempo_lectura?: number;
+  es_internacional?: boolean;
 
   // Datos del autor
   autor_info?: AutorInfo;

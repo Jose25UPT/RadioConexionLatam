@@ -94,6 +94,7 @@ class NoticiaRespuesta(NoticiaBase):
     last_edited_by: Optional[str] = None
     last_edited_at: Optional[datetime] = None
     tiempo_lectura: Optional[int] = 0
+    es_internacional: Optional[bool] = False
 
     class Config:
         # para serializar objetos ORM

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Calendar, User, ChevronLeft, ChevronRight,
   Share2, Search,
-  Star, Eye, Tag, ArrowUp, Sparkles, Film, Book, Check
+  Star, Eye, Tag, ArrowUp, Sparkles, Film, Book, Check, Globe
 } from 'lucide-react';
 
 import type { Noticia as NoticiaTipo } from '../types/Noticia';
@@ -308,7 +308,11 @@ export default function AllNewsModern() {
                   onClick={() => handleNewsClick(noticia)}
                   onMouseMove={handleTilt}
                   onMouseLeave={resetTilt}
-                  className="group relative bg-white rounded-3xl overflow-hidden shadow-lg cursor-pointer border border-amber-100 hover:border-amber-300 hover:shadow-[0_20px_60px_rgba(251,191,36,0.25)] transition-[transform,box-shadow,border-color] duration-300"
+                  className={`group relative bg-white rounded-3xl overflow-hidden shadow-lg cursor-pointer border transition-[transform,box-shadow,border-color] duration-300 ${
+                    noticia.es_internacional
+                      ? 'border-emerald-200 hover:border-emerald-400 hover:shadow-[0_20px_60px_rgba(52,211,153,0.2)]'
+                      : 'border-amber-100 hover:border-amber-300 hover:shadow-[0_20px_60px_rgba(251,191,36,0.25)]'
+                  }`}
                 >
                   <div className="relative h-64 overflow-hidden">
                     <img
@@ -327,6 +331,13 @@ export default function AllNewsModern() {
                         </span>
                       )}
                     </div>
+                    {noticia.es_internacional && (
+                      <div className="absolute top-4 right-4">
+                        <span className="inline-flex items-center gap-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
+                          <Globe className="w-2.5 h-2.5" /> Internacional
+                        </span>
+                      </div>
+                    )}
                     <div className="absolute bottom-4 left-4 right-4">
                       <h2 className="text-white font-extrabold text-xl font-['Cinzel'] line-clamp-2 group-hover:text-amber-200 transition-colors duration-300 leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]">
                         {noticia.titulo}
@@ -377,7 +388,11 @@ export default function AllNewsModern() {
                 <article
                   key={noticia.id}
                   onClick={() => handleNewsClick(noticia)}
-                  className="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-stone-100 hover:border-amber-200"
+                  className={`group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border ${
+                    noticia.es_internacional
+                      ? 'border-emerald-100 hover:border-emerald-300'
+                      : 'border-stone-100 hover:border-amber-200'
+                  }`}
                 >
                   <div className="flex flex-col md:flex-row">
                     {/* Image */}
@@ -388,7 +403,7 @@ export default function AllNewsModern() {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-r md:bg-gradient-to-t from-black/40 to-transparent"></div>
-                      
+
                       {/* Badges */}
                       <div className="absolute top-4 left-4 flex gap-2">
                         <span className="bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
@@ -397,6 +412,11 @@ export default function AllNewsModern() {
                         {noticia.destacada && (
                           <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
                             <Star className="w-3 h-3" />
+                          </span>
+                        )}
+                        {noticia.es_internacional && (
+                          <span className="inline-flex items-center gap-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-2.5 py-1 rounded-full text-xs font-bold">
+                            <Globe className="w-3 h-3" /> Internacional
                           </span>
                         )}
                       </div>

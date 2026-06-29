@@ -164,6 +164,14 @@ def listar_noticias(
         .all()
     )
     
+    # Cache de roles para evitar N+1 al determinar es_internacional
+    roles_cache: dict[int, str] = {}
+    try:
+        for r in db.query(modelos.Rol).all():
+            roles_cache[r.id] = r.nombre
+    except Exception:
+        pass
+
     for noticia in noticias:
         noticia.imagen = noticia.imagen_principal
         noticia.fecha = noticia.fecha_publicacion
@@ -174,6 +182,7 @@ def listar_noticias(
             cat = db.query(modelos.Categoria).get(noticia.categoria_id)
             noticia.categoria = cat.nombre if cat else None
         # Autor info desde relación usuario
+        noticia.es_internacional = False
         if noticia.autor_id:
             u = db.query(modelos.Usuario).get(noticia.autor_id)
             if u:
@@ -193,13 +202,14 @@ def listar_noticias(
                     redes_sociales=u.redes_sociales or {},
                     frase=u.frase_personal,
                 )
+                noticia.es_internacional = (roles_cache.get(u.rol_id) == 'internacional') if u.rol_id else False
         # Normalizar estado textual: si no hay estado explícito, considerarlo 'publicado' para el endpoint público
         if noticia.estado_id:
             est = db.get(modelos.EstadoNoticia, noticia.estado_id)
             noticia.estado = est.nombre if est else None
         else:
             noticia.estado = 'publicado'
-    
+
     return noticias
 
 @router.get("/categorias/", response_model=list[str])

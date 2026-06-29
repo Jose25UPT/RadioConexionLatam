@@ -1,4 +1,4 @@
-import { Calendar, ChevronLeft, ChevronRight, User } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, User, Globe } from 'lucide-react';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchJson, API_BASE } from '../lib/api';
@@ -182,7 +182,11 @@ export default function News() {
                     onClick={() => handleClick(n)}
                     className="flex-none w-full sm:w-1/2 lg:w-1/3 px-3 cursor-pointer group"
                   >
-                    <div className="bg-slate-900/80 rounded-2xl overflow-hidden border border-white/10 hover:border-cyan-400/40 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/10 h-full flex flex-col">
+                    <div className={`rounded-2xl overflow-hidden border transition-all duration-300 hover:shadow-xl h-full flex flex-col ${
+                      tab === 'internacional'
+                        ? 'bg-emerald-950/70 border-emerald-500/30 hover:border-emerald-400/60 hover:shadow-emerald-500/15'
+                        : 'bg-slate-900/80 border-white/10 hover:border-cyan-400/40 hover:shadow-cyan-500/10'
+                    }`}>
                       {/* Imagen */}
                       <div className="relative h-52 overflow-hidden flex-shrink-0">
                         <img
@@ -195,6 +199,12 @@ export default function News() {
                         {n.categoria && (
                           <span className="absolute top-4 left-4 bg-gradient-to-r from-blue-600 to-fuchsia-600 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow">
                             {n.categoria}
+                          </span>
+                        )}
+                        {/* Badge Internacional */}
+                        {tab === 'internacional' && (
+                          <span className="absolute top-4 right-4 inline-flex items-center gap-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
+                            <Globe size={9} /> Internacional
                           </span>
                         )}
                       </div>
