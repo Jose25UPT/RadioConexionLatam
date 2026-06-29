@@ -369,7 +369,7 @@ def obtener_noticia(noticia_id: int, db: Session = Depends(get_db)):
 def crear_noticia(
     noticia: esquemas.NoticiaCrear,
     db: Session = Depends(get_db),
-    token: str | None = Depends(oauth2_scheme_optional)
+    user: modelos.Usuario = Depends(get_current_user)
 ):
     """
     Crea una nueva noticia.
@@ -378,22 +378,11 @@ def crear_noticia(
     slug_base = generar_slug(noticia.titulo)
     slug = slug_base
     contador = 1
-    
+
     # Verificar que el slug sea único
     while db.query(modelos.Noticia).filter(modelos.Noticia.slug == slug).first():
         slug = f"{slug_base}-{contador}"
         contador += 1
-    
-    # Resolver usuario desde token
-    user = None
-    if token:
-        try:
-            payload = decodificar_token(token)
-            if payload and payload.get("sub"):
-                from app.rutas_auth import get_user_by_username_or_email
-                user = get_user_by_username_or_email(db, payload["sub"])  # nombre o email
-        except Exception:
-            user = None
 
     # Resolver categoría
     categoria_id = None
@@ -457,8 +446,7 @@ def crear_noticia(
         if isinstance(img_val, str) and img_val.strip().startswith('http'):
             # Rechazar URLs absolutas para forzar uso de subida de archivos
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Solo se aceptan imágenes subidas; por favor use el botón de subir imagen.")
-    if user:
-        datos_noticia['autor_id'] = user.id
+    datos_noticia['autor_id'] = user.id
 
     # Calcular tiempo estimado de lectura (palabras/200 redondeado)
     palabras = len((noticia.contenido or '').split())

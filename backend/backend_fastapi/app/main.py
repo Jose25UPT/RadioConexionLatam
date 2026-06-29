@@ -6,6 +6,7 @@ from app.rutas_auth import router as auth_router
 from app.rutas_admin import router as admin_router
 from app.rutas_notas import router as notas_router
 from app.rutas_fanschoice import router as fanschoice_router
+from app.rutas_timeline import router as timeline_router
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from sqlalchemy.orm import Session
@@ -47,6 +48,7 @@ app.include_router(auth_router)
 app.include_router(admin_router)
 app.include_router(notas_router)
 app.include_router(fanschoice_router)
+app.include_router(timeline_router, prefix="/api/timeline")
 
 # Servir archivos estáticos (imágenes subidas)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
@@ -199,6 +201,20 @@ def crear_admin_y_editor_por_defecto():
         else:
             print("Usuario editor ya existe.")
             
+        # Seed categorías de Timeline si no existen
+        print("Verificando categorías de Timeline...")
+        if not db.query(modelos.TimelineCategoria).first():
+            categorias_default = [
+                "Mejor Locutor",
+                "Programa Revelación",
+                "Mejor Entrevista",
+                "Elección del Público",
+            ]
+            for nombre in categorias_default:
+                db.add(modelos.TimelineCategoria(nombre=nombre))
+            db.commit()
+            print(f"Categorías de Timeline creadas: {categorias_default}")
+
     except Exception as e:
         print(f"Error durante la inicialización: {e}")
         db.rollback()

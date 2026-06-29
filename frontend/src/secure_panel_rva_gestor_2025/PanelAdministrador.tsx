@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FileText, Eye, Pencil, Trash2, Plus, Search, Clock, LogOut, History, Tag, MessageSquare } from 'lucide-react';
+import { FileText, Eye, Pencil, Trash2, Plus, Search, Clock, LogOut, History, Tag, MessageSquare, Trophy } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PANEL_BASE } from './secureRoute';
 import { getToken } from './auth';
@@ -105,6 +105,12 @@ const PanelAdministrador: React.FC = () => {
                 title="Gestionar notas">
                 <MessageSquare size={16} />
                 <span className="hidden sm:inline">Notas</span>
+              </Link>
+              <Link to={`${PANEL_BASE}/timeline`}
+                className="flex items-center gap-1.5 bg-fuchsia-50 text-fuchsia-700 px-3 py-2 rounded-lg hover:bg-fuchsia-100 transition-all text-sm font-medium border border-fuchsia-200"
+                title="Gestionar Línea de Tiempo">
+                <Trophy size={16} />
+                <span className="hidden sm:inline">Línea de Tiempo</span>
               </Link>
               <Link to={`${PANEL_BASE}/categorias`}
                 className="flex items-center gap-1.5 bg-stone-100 text-stone-700 px-3 py-2 rounded-lg hover:bg-stone-200 transition-all text-sm font-medium"

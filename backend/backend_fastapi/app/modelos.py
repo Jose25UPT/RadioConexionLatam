@@ -263,3 +263,43 @@ class NoticiaHistorial(Base):
     cambios = Column(JSONB, default={})
     comentario = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+# ─── Timeline / Salón de la Fama ─────────────────────────────────────────────
+
+class TimelineCategoria(Base):
+    __tablename__ = "timeline_categorias"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nombre = Column(String(100), nullable=False)
+
+    participantes = relationship("TimelineParticipante", back_populates="categoria")
+
+
+class TimelineEvento(Base):
+    __tablename__ = "timeline_eventos"
+
+    id = Column(Integer, primary_key=True, index=True)
+    anio = Column(Integer, nullable=False, unique=True)
+    titulo_evento = Column(String(200), nullable=False)
+
+    participantes = relationship(
+        "TimelineParticipante",
+        back_populates="evento",
+        cascade="all, delete-orphan",
+    )
+
+
+class TimelineParticipante(Base):
+    __tablename__ = "timeline_participantes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    evento_id = Column(Integer, ForeignKey("timeline_eventos.id"), nullable=False)
+    categoria_id = Column(Integer, ForeignKey("timeline_categorias.id"), nullable=False)
+    nombre = Column(String(200), nullable=False)
+    periodo_tiempo = Column(String(100), nullable=True)
+    es_ganador = Column(Boolean, default=False)
+    imagen_url = Column(String(500), nullable=True)
+
+    evento = relationship("TimelineEvento", back_populates="participantes")
+    categoria = relationship("TimelineCategoria", back_populates="participantes")

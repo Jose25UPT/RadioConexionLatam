@@ -27,7 +27,7 @@ export default function Footer() {
                 <div className="w-2 h-2 bg-pink-500 rounded-full animate-pulse"></div>
                 <span className="font-medium">EN VIVO</span>
                 <Headphones className="h-3 w-3" />
-                <span>Siempre conectados</span>
+                <span>Siempre Conectados</span>
               </div>
             </div>
           </div>

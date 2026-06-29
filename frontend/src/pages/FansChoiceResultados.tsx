@@ -166,6 +166,13 @@ export default function FansChoiceResultados() {
           <h1 className="text-4xl md:text-5xl font-black text-white mb-3">Fans Choice 2026</h1>
           <p className="text-white/80 text-lg mb-4">Resultados Oficiales</p>
 
+          <Link
+            to="/salon-de-la-fama"
+            className="inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/30 text-white font-bold text-sm rounded-full px-5 py-2.5 transition-colors mb-2"
+          >
+            🏅 Ver Salón de la Fama
+          </Link>
+
           <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-5 py-2 text-white text-sm border border-white/20">
             <span>📅</span>
             <span>Votos válidos hasta el 30 de abril de 2026 · 23:59</span>

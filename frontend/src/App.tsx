@@ -28,8 +28,10 @@ import { RequireAuth } from './secure_panel_rva_gestor_2025/auth';
 import MiPerfil from './secure_panel_rva_gestor_2025/MiPerfil';
 import GestorCategorias from './secure_panel_rva_gestor_2025/GestorCategorias';
 import GestorNotas from './secure_panel_rva_gestor_2025/GestorNotas';
+import GestorTimeline from './secure_panel_rva_gestor_2025/GestorTimeline';
 import TodasLasNotas from './pages/TodasLasNotas';
 import FansChoiceResultados from './pages/FansChoiceResultados';
+import SalonDeLaFama from './pages/SalonDeLaFama';
 import NotFound from './components/NotFound';
 
 const AuthWrapper = ({ children, roles }: { children: React.ReactNode, roles?: any }) => (
@@ -170,6 +172,34 @@ function App() {
                 <AudioPlayer onToggleVisibility={handleTogglePlayerVisibility} />
               </div>
             </AuthWrapper>
+          }
+        />
+
+        {/* Panel: gestor de línea de tiempo / salón de la fama */}
+        <Route
+          path={`${PANEL_BASE}/timeline`}
+          element={
+            <AuthWrapper roles={["EDITOR"]}>
+              <div className="min-h-screen bg-white">
+                <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+                <GestorTimeline />
+                <Footer />
+                <AudioPlayer onToggleVisibility={handleTogglePlayerVisibility} />
+              </div>
+            </AuthWrapper>
+          }
+        />
+
+        {/* Salón de la Fama (público) */}
+        <Route
+          path="/salon-de-la-fama"
+          element={
+            <div className="min-h-screen bg-white">
+              <Header isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+              <SalonDeLaFama />
+              <Footer />
+              <AudioPlayer onToggleVisibility={handleTogglePlayerVisibility} />
+            </div>
           }
         />
 

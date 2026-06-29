@@ -50,3 +50,9 @@ Thumbs.db
 !.vscode/extensions.json
 *.swp
 *.swo
+
+# ─── Archivos de Claude Code ──────────────────────────────────────────────────
+CLAUDE.md
+
+# ─── Proyectos de referencia ──────────────────────────────────────────────────
+radio_miguel1/

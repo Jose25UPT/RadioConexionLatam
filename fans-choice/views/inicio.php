@@ -234,6 +234,11 @@ include __DIR__ . '/partials/header.php';
             <a href="https://www.radioconexionlatam.net.pe/" class="btn-aceptar" style="text-decoration:none; text-align:center;">
                 Volver al inicio
             </a>
+            <a href="https://www.radioconexionlatam.net.pe/fans-choice-resultados"
+               class="btn-aceptar"
+               style="text-decoration:none; text-align:center; background: linear-gradient(135deg, #f39c12, #e67e22);">
+                Ver Resultados
+            </a>
         </div>
     </section>
 <?php else: ?>

@@ -249,13 +249,10 @@ export default function NewsDetailModern() {
     return () => { mounted = false; };
   }, [slug]);
 
-  // Registrar vista tras 40 segundos de permanencia real en la página
+  // Registrar vista al cargar la noticia
   useEffect(() => {
     if (!noticia?.id) return;
-    const timer = setTimeout(() => {
-      fetch(`/api/noticias/${noticia.id}/vista`, { method: 'POST' }).catch(() => {});
-    }, 40_000);
-    return () => clearTimeout(timer);
+    fetch(`/api/noticias/${noticia.id}/vista`, { method: 'POST' }).catch(() => {});
   }, [noticia?.id]);
 
   // Artículos del mismo autor (desplegable)
