@@ -59,6 +59,39 @@ def raiz():
 
 
 @app.on_event("startup")
+def inicializar_roles_base():
+    """Crea los roles base (admin, editor, internacional) y el estado 'publicado' siempre,
+    independientemente de AUTO_CREATE_DEFAULT_ADMIN."""
+    db: Session = SessionLocal()
+    try:
+        for nombre, descripcion, permisos in [
+            ("admin", "Administrador del sistema", {"all": True}),
+            ("editor", "Editor de contenido", {"create_articles": True, "edit_articles": True, "publish_articles": True, "delete_articles": False}),
+            ("internacional", "Editor de contenido internacional", {"create_articles": True, "edit_articles": True, "publish_articles": True, "delete_articles": False}),
+        ]:
+            if not db.query(modelos.Rol).filter_by(nombre=nombre).first():
+                db.add(modelos.Rol(nombre=nombre, descripcion=descripcion, permisos=permisos))
+                print(f"Rol '{nombre}' creado.")
+        db.commit()
+
+        if not db.query(modelos.EstadoNoticia).filter_by(nombre='publicado').first():
+            db.add(modelos.EstadoNoticia(nombre='publicado', descripcion='Publicado', color_hex='#28a745', activo=True))
+            db.commit()
+            print("Estado 'publicado' creado.")
+
+        if not db.query(modelos.TimelineCategoria).first():
+            for nombre in ["Mejor Locutor", "Programa Revelación", "Mejor Entrevista", "Elección del Público"]:
+                db.add(modelos.TimelineCategoria(nombre=nombre))
+            db.commit()
+            print("Categorías de Timeline creadas.")
+    except Exception as e:
+        print(f"[startup] Error en inicializar_roles_base: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+
+@app.on_event("startup")
 def crear_admin_y_editor_por_defecto():
     """Crea roles base (admin, editor, autor) y usuarios por defecto (admin/admin y editor/editor123)
     si no existen y la variable AUTO_CREATE_DEFAULT_ADMIN está habilitada.
@@ -104,28 +137,15 @@ def crear_admin_y_editor_por_defecto():
             db.refresh(rol_editor)
             print(f"Rol editor creado con ID: {rol_editor.id}")
 
-        # Crear rol internacional si no existe
+        # Leer rol internacional (ya creado por inicializar_roles_base)
         rol_internacional = db.query(modelos.Rol).filter_by(nombre="internacional").first()
-        if not rol_internacional:
-            print("Creando rol internacional...")
-            rol_internacional = modelos.Rol(
-                nombre="internacional",
-                descripcion="Editor de contenido internacional (noticias en sección separada)",
-                permisos={
-                    "create_articles": True,
-                    "edit_articles": True,
-                    "publish_articles": True,
-                    "delete_articles": False
-                }
-            )
-            db.add(rol_internacional)
-            db.commit()
-            db.refresh(rol_internacional)
-            print(f"Rol internacional creado con ID: {rol_internacional.id}")
 
         # Migrar usuarios con roles distintos a admin/editor/internacional hacia editor, y eliminar roles extra
         print("Normalizando roles a 'admin', 'editor' e 'internacional'...")
-        roles_permitidos = {"admin": rol_admin.id, "editor": rol_editor.id, "internacional": rol_internacional.id}
+        roles_permitidos_dict = {"admin": rol_admin.id, "editor": rol_editor.id}
+        if rol_internacional:
+            roles_permitidos_dict["internacional"] = rol_internacional.id
+        roles_permitidos = roles_permitidos_dict
         # Asignar 'editor' a cualquier usuario con rol no permitido
         usuarios_no_permitidos = (
             db.query(modelos.Usuario)
@@ -147,16 +167,6 @@ def crear_admin_y_editor_por_defecto():
             db.commit()
             print(f"Roles eliminados: {[r.nombre for r in roles_extra]}")
 
-        # Asegurar estado por defecto 'publicado' para noticias
-        print("Verificando estado por defecto 'publicado'...")
-        estado_publicado = db.query(modelos.EstadoNoticia).filter(modelos.EstadoNoticia.nombre == 'publicado').first()
-        if not estado_publicado:
-            estado_publicado = modelos.EstadoNoticia(nombre='publicado', descripcion='Publicado', color_hex='#28a745', activo=True)
-            db.add(estado_publicado)
-            db.commit()
-            db.refresh(estado_publicado)
-            print(f"Estado 'publicado' creado con ID: {estado_publicado.id}")
-        
         # Luego crear usuario admin si no existe
         print("Verificando usuario admin...")
         existe = db.query(modelos.Usuario).filter_by(nombre_usuario="admin").first()
@@ -220,20 +230,6 @@ def crear_admin_y_editor_por_defecto():
         else:
             print("Usuario editor ya existe.")
             
-        # Seed categorías de Timeline si no existen
-        print("Verificando categorías de Timeline...")
-        if not db.query(modelos.TimelineCategoria).first():
-            categorias_default = [
-                "Mejor Locutor",
-                "Programa Revelación",
-                "Mejor Entrevista",
-                "Elección del Público",
-            ]
-            for nombre in categorias_default:
-                db.add(modelos.TimelineCategoria(nombre=nombre))
-            db.commit()
-            print(f"Categorías de Timeline creadas: {categorias_default}")
-
     except Exception as e:
         print(f"Error durante la inicialización: {e}")
         db.rollback()
