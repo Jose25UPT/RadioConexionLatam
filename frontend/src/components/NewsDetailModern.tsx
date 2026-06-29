@@ -5,7 +5,7 @@ import {
   ArrowLeft, User, Eye, Share2,
   Calendar, TrendingUp,
   Check, MessageSquare,
-  Star, Globe, ChevronLeft
+  Star, Globe, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 import type { Noticia as NoticiaTipo } from '../types/Noticia';
