@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { PANEL_BASE } from './secureRoute';
 import { API_BASE } from '../lib/api';
 
-type Rol = 'admin' | 'editor';
+type Rol = 'admin' | 'editor' | 'internacional';
 
 interface Usuario {
   id: string;
@@ -42,8 +42,8 @@ interface ProfileForm {
   redes_sociales: Record<string, string>;
 }
 
-const ROL_LABELS: Record<Rol, string> = { admin: 'Admin', editor: 'Editor' };
-const ROLES: Rol[] = ['admin', 'editor'];
+const ROL_LABELS: Record<Rol, string> = { admin: 'Admin', editor: 'Editor', internacional: 'Internacional' };
+const ROLES: Rol[] = ['admin', 'editor', 'internacional'];
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
