@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body
 from sqlalchemy.orm import Session, joinedload
 from app.base_datos import SessionLocal
 from app import modelos
@@ -61,7 +61,7 @@ def listar_eventos(db: Session = Depends(get_db)):
 
 @router.post("/eventos", response_model=dict, status_code=status.HTTP_201_CREATED)
 def crear_evento(
-    payload: dict,
+    payload: dict = Body(...),
     db: Session = Depends(get_db),
     _u: modelos.Usuario = Depends(require_role(["admin", "editor"])),
 ):
@@ -82,7 +82,7 @@ def crear_evento(
 @router.put("/eventos/{evento_id}", response_model=dict)
 def actualizar_evento(
     evento_id: int,
-    payload: dict,
+    payload: dict = Body(...),
     db: Session = Depends(get_db),
     _u: modelos.Usuario = Depends(require_role(["admin", "editor"])),
 ):
@@ -115,7 +115,7 @@ def eliminar_evento(
 
 @router.post("/participantes", response_model=dict, status_code=status.HTTP_201_CREATED)
 def crear_participante(
-    payload: dict,
+    payload: dict = Body(...),
     db: Session = Depends(get_db),
     _u: modelos.Usuario = Depends(require_role(["admin", "editor"])),
 ):
@@ -145,7 +145,7 @@ def crear_participante(
 @router.put("/participantes/{participante_id}", response_model=dict)
 def actualizar_participante(
     participante_id: int,
-    payload: dict,
+    payload: dict = Body(...),
     db: Session = Depends(get_db),
     _u: modelos.Usuario = Depends(require_role(["admin", "editor"])),
 ):
@@ -183,7 +183,7 @@ def eliminar_participante(
 
 @router.post("/categorias", response_model=dict, status_code=status.HTTP_201_CREATED)
 def crear_categoria(
-    payload: dict,
+    payload: dict = Body(...),
     db: Session = Depends(get_db),
     _u: modelos.Usuario = Depends(require_role(["admin", "editor"])),
 ):
@@ -200,7 +200,7 @@ def crear_categoria(
 @router.put("/categorias/{cat_id}", response_model=dict)
 def actualizar_categoria(
     cat_id: int,
-    payload: dict,
+    payload: dict = Body(...),
     db: Session = Depends(get_db),
     _u: modelos.Usuario = Depends(require_role(["admin", "editor"])),
 ):
