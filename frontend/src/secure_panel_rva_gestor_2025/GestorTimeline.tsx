@@ -173,7 +173,7 @@ export default function GestorTimeline() {
       const fd = new FormData();
       fd.append('file', file);
       const token = localStorage.getItem('auth_token');
-      const res = await fetch('/api/uploads/upload', {
+      const res = await fetch('/api/uploads/imagen', {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: fd,
