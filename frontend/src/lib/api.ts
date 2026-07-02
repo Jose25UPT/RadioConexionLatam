@@ -33,6 +33,10 @@ export async function fetchJson<T = any>(path: string, init?: RequestInit): Prom
   if (token && !(headers as Record<string, string>)['Authorization']) {
     (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
   }
+  // Auto-set Content-Type for JSON string bodies (skip FormData — browser sets multipart boundary)
+  if (typeof init?.body === 'string' && !(headers as Record<string, string>)['Content-Type']) {
+    (headers as Record<string, string>)['Content-Type'] = 'application/json';
+  }
   const url = `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
   const res = await fetch(url, { ...init, headers });
   if (!res.ok) {
